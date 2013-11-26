@@ -1,0 +1,5 @@
+C:\Users\Admin\Desktop\SPCore\SPCore\SPCore\bin\Debug\SPCore.dll
+C:\Users\Admin\Desktop\SPCore\SPCore\SPCore\bin\Debug\SPCore.pdb
+C:\Users\Admin\Desktop\SPCore\SPCore\SPCore\obj\Debug\SPCore.dll
+C:\Users\Admin\Desktop\SPCore\SPCore\SPCore\obj\Debug\SPCore.pdb
+C:\Users\Admin\Desktop\SPCore\SPCore\SPCore\obj\Debug\SPCore.csprojResolveAssemblyReference.cache
