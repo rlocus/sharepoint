@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -159,7 +160,7 @@ namespace SPCore
                     }
                     else
                     {
-                        throw new SPException(string.Format("Content type with Id = \"{0}\" not found.",
+                        throw new SPException(string.Format("Content type with Id = \"{0}\" not found or not available.",
                                                             parentContentTypeId));
                     }
                 }
@@ -369,30 +370,6 @@ namespace SPCore
             }
 
             return list;
-        }
-
-        public static void DoUnsafeUpdate(this SPWeb web, Action<SPWeb> action)
-        {
-            web.DoUnsafeUpdate(() => action(web));
-        }
-
-        public static void DoUnsafeUpdate(this SPWeb web, Action action)
-        {
-            bool allowUnsafeUpdates = web.AllowUnsafeUpdates;
-
-            try
-            {
-                web.AllowUnsafeUpdates = true;
-
-                if (action != null)
-                {
-                    action();
-                }
-            }
-            finally
-            {
-                web.AllowUnsafeUpdates = allowUnsafeUpdates;
-            }
         }
 
         public static string AddWebPartToPage(this SPWeb web, string webPartName, string pageUrl, string zoneId, int zoneIndex, Action<WebPart> action, out string errorMsg)
@@ -667,25 +644,62 @@ namespace SPCore
             return newPage;
         }
 
-        public static Boolean DoesUserHavePermissions(this SPWeb web, String listTitle, out SPList list)
-        {
-            Boolean catchException = SPSecurity.CatchAccessDeniedException;
-            SPSecurity.CatchAccessDeniedException = false;
+        //public static Boolean DoesUserHavePermissions(this SPWeb web, String listTitle, out SPList list)
+        //{
+        //    Boolean catchException = SPSecurity.CatchAccessDeniedException;
+        //    SPSecurity.CatchAccessDeniedException = false;
 
-            try
+        //    try
+        //    {
+        //        list = web.Lists[listTitle];
+        //        return true;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        list = null;
+        //        return false;
+        //    }
+        //    finally
+        //    {
+        //        //reset the flag to original value
+        //        SPSecurity.CatchAccessDeniedException = catchException;
+        //    }
+        //}
+
+        /// <summary>
+        /// Checks if the custom action is contained in the SPUserCustomActionCollection and if so, 
+        /// returns the id in the customActionId parameter
+        /// </summary>
+        /// <param name="web">The SharePoint web</param>
+        /// <param name="customActionName">Name property given to the CustomAction element in the definition</param>
+        /// <returns>The custom action Id or an empty string if not found</returns>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Dependency-injected classes should expose non-static members only for consistency.")]
+        public static Guid GetCustomActionIdForName(this SPWeb web, string customActionName)
+        {
+            Guid customActionId = default(Guid);
+
+            foreach (SPUserCustomAction customAction in web.UserCustomActions.Where(customAction => string.Equals(customAction.Name, customActionName)))
             {
-                list = web.Lists[listTitle];
-                return true;
+                customActionId = customAction.Id;
             }
-            catch (Exception)
+
+            return customActionId;
+        }
+
+        /// <summary>
+        /// Removes a custom action from a web
+        /// </summary>
+        /// <param name="web">The SharePoint web</param>
+        /// <param name="actionName">The ID for the custom action</param>
+        public static void DeleteCustomAction(this SPWeb web, string actionName)
+        {
+            Guid customActionId = GetCustomActionIdForName(web, actionName);
+
+            if (customActionId != default(Guid))
             {
-                list = null;
-                return false;
-            }
-            finally
-            {
-                //reset the flag to original value
-                SPSecurity.CatchAccessDeniedException = catchException;
+                SPUserCustomAction customAction = web.UserCustomActions[customActionId];
+                customAction.Delete();
+                web.Update();
             }
         }
     }

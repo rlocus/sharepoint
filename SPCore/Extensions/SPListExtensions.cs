@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Office.Server.Utilities;
 using Microsoft.SharePoint;
@@ -107,6 +108,34 @@ namespace SPCore
             }
 
             list.ContentTypes.Add(contentType);
+        }
+
+        /// <summary>
+        /// Ensures the SPContentType is in the collection. If not, it will be created and added.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="contentTypeId">The content type id.</param>
+        /// <param name="contentTypeName">Name of the content type.</param>
+        /// <param name="action"></param>
+        /// <returns><c>True</c> if it was added, else <c>False</c>.</returns>
+        /// <exception cref="System.ArgumentNullException">For any null parameter.</exception>
+        public static SPContentType CreateContentType(this SPList list, SPContentTypeId contentTypeId, string contentTypeName, Action<SPContentType> action = null)
+        {
+            if (string.IsNullOrEmpty(contentTypeName))
+            {
+                throw new ArgumentNullException("contentTypeName");
+            }
+
+            SPContentType contentType = new SPContentType(contentTypeId, list.ContentTypes, contentTypeName);
+            AddContentType(list, contentType, true);
+
+            if (action != null)
+            {
+                action(contentType);
+            }
+
+            contentType.Update(false);
+            return contentType;
         }
 
         public static void Clear(this SPList list, string query = "", uint batchSize = SPHelper.MaxRowLimit, bool recycleBinDisabled = false)

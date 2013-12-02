@@ -206,22 +206,21 @@ namespace SPCore
             {
                 using (SPWeb web = contentType.ParentWeb.Site.OpenWeb(webUrl))
                 {
-                    web.DoUnsafeUpdate(
-                        () =>
+                    using (new Unsafe(web))
+                    {
+                        foreach (string listUrl in listUrls[webUrl])
                         {
-                            foreach (string listUrl in listUrls[webUrl])
+                            SPList list = web.GetListByUrl(listUrl);
+
+                            SPContentType ct = list.GetContentTypeById(contentType.Id);
+
+                            if (ct != null)
                             {
-                                SPList list = web.GetListByUrl(listUrl);
-
-                                SPContentType ct = list.GetContentTypeById(contentType.Id);
-
-                                if (ct != null)
-                                {
-                                    action(ct);
-                                    ct.Update(throwOnSealedOrReadOnly);
-                                }
+                                action(ct);
+                                ct.Update(throwOnSealedOrReadOnly);
                             }
-                        });
+                        }
+                    }
                 }
             }
         }

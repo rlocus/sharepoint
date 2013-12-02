@@ -197,20 +197,23 @@ namespace SPCore.Helper
             using (SPSite targetSite = new SPSite(targetFolderUrl, userToken))
             using (SPWeb targetWeb = targetSite.OpenWeb())
             {
-                sourceWeb.DoUnsafeUpdate(() => targetWeb.DoUnsafeUpdate(() =>
+                using (new Unsafe(sourceWeb))
                 {
-                    SPFile sourceFile = sourceWeb.GetFile(sourceFileUrl);
-                    SPFolder targetFolder = targetWeb.GetFolder(targetFolderUrl);
+                    using (new Unsafe(targetWeb))
+                    {
+                        SPFile sourceFile = sourceWeb.GetFile(sourceFileUrl);
+                        SPFolder targetFolder = targetWeb.GetFolder(targetFolderUrl);
 
-                    if (includeHistory)
-                    {
-                        CopyFileAndHistory(sourceFile, targetFolder, overwrite);
+                        if (includeHistory)
+                        {
+                            CopyFileAndHistory(sourceFile, targetFolder, overwrite);
+                        }
+                        else
+                        {
+                            CopyFile(sourceFile, targetFolder, overwrite);
+                        }
                     }
-                    else
-                    {
-                        CopyFile(sourceFile, targetFolder, overwrite);
-                    }
-                }));
+                }
             }
         }
 
@@ -461,7 +464,6 @@ namespace SPCore.Helper
             string result;
             SPWeb web = list.ParentWeb;
             result = web.ProcessBatchData(batchCommand);
-            //web.DoUnsafeUpdate(w => result = w.ProcessBatchData(batchCommand));
         }
 
         public static void AddDataTableToList(DataTable dt, SPList list, bool systemUpdate = false, bool doNotFireEvents = false)
@@ -594,9 +596,21 @@ namespace SPCore.Helper
 
         public static void RunWithDisabledEvent(Action action)
         {
-            using (EventsFiringDisabledScope scope = new EventsFiringDisabledScope())
+            if (action == null) return;
+
+            using (new EventsFiringDisabledScope())
             {
                 action.Invoke(); // will NOT fire events
+            }
+        }
+
+        public static void DoUnsafeUpdate(SPWeb web, Action action)
+        {
+            if (action == null) return;
+
+            using (new Unsafe(web))
+            {
+                action.Invoke();
             }
         }
 
@@ -703,14 +717,44 @@ namespace SPCore.Helper
                 {
                     SPList list = web.TryGetListByUrl(listUrl);
 
-                    if (list != null)
+                    if (list != null && list is TList)
                     {
-                        if (list is TList)
-                        {
-                            yield return (TList)list;
-                        }
+                        yield return (TList)list;
                     }
                 }
+        }
+
+        public static bool IsJobDefined(SPFarm farm, string jobName)
+        {
+            SPServiceCollection services = farm.Services;
+            return
+                services.SelectMany(service => service.JobDefinitions).Any(
+                    job => string.Compare(job.Title, jobName, StringComparison.OrdinalIgnoreCase) == 0 ||
+                           string.Compare(job.Name, jobName, StringComparison.InvariantCulture) == 0);
+        }
+
+        /// <summary>
+        /// Determines whether the specified timer job is currently running (or
+        /// scheduled to run).
+        /// </summary>
+        /// <param name="farm">The farm to check if the job is running on.</param>
+        /// <param name="jobTitle">The title of the timer job.</param>
+        /// <returns><c>true</c> if the specified timer job is currently running
+        /// (or scheduled to run); otherwise <c>false</c>.</returns>
+        public static bool IsJobRunning(SPFarm farm, string jobTitle)
+        {
+            SPServiceCollection services = farm.Services;
+            return
+                services.SelectMany(service => service.RunningJobs.Cast<SPRunningJob>()).Any(
+                    job => string.Compare(job.JobDefinitionTitle, jobTitle, StringComparison.OrdinalIgnoreCase) == 0);
+        }
+
+        public static bool IsJobRunning(SPFarm farm, Guid jobId)
+        {
+            SPServiceCollection services = farm.Services;
+            return
+                services.SelectMany(service => service.RunningJobs.Cast<SPRunningJob>()).Any(
+                    job => job.JobDefinitionId.Equals(jobId));
         }
     }
 }
