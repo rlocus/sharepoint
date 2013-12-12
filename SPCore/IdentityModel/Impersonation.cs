@@ -15,7 +15,7 @@ namespace SPCore.IdentityModel
         private SafeTokenHandle _handle;
         private WindowsImpersonationContext _context;
 
-        private const int LOGON32_LOGON_INTERACTIVE = 3;
+        private const int LOGON32_LOGON_NETWORK = 3;
         //private const int LOGON32_LOGON_NEW_CREDENTIALS = 9;
         private const int LOGON32_PROVIDER_DEFAULT = 0;
 
@@ -34,7 +34,7 @@ namespace SPCore.IdentityModel
         private bool Impersonate()
         {
             Authenticated = LogonUser(_username, _domain, _password,
-                           LOGON32_LOGON_INTERACTIVE/*LOGON32_LOGON_NEW_CREDENTIALS*/, LOGON32_PROVIDER_DEFAULT, out this._handle);
+                           LOGON32_LOGON_NETWORK/*LOGON32_LOGON_NEW_CREDENTIALS*/, LOGON32_PROVIDER_DEFAULT, out this._handle);
 
             if (!Authenticated)
             {
