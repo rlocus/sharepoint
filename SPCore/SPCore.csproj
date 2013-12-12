@@ -37,6 +37,10 @@
     <AssemblyOriginatorKeyFile>SPCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\Microsoft.IdentityModel\3.5.0.0__31bf3856ad364e35\Microsoft.IdentityModel.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Server, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\14\ISAPI\Microsoft.Office.Server.dll</HintPath>
@@ -61,6 +65,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\14\ISAPI\Microsoft.SharePoint.Client.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.SharePoint.IdentityModel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\Microsoft.SharePoint.IdentityModel\14.0.0.0__71e9bce111e9429c\Microsoft.SharePoint.IdentityModel.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.SharePoint.Linq, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\14\ISAPI\Microsoft.SharePoint.Linq.dll</HintPath>
@@ -81,6 +89,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -94,9 +103,7 @@
     <Compile Include="Base\BaseListDefinition.cs" />
     <Compile Include="Base\BaseVisualWebPart.cs" />
     <Compile Include="Base\IBaseVisualWebPart.cs" />
-    <Compile Include="Base\BaseVisualWebPartUserControl.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="Base\BaseVisualWebPartUserControl.cs" />
     <Compile Include="BusinessData\BaseEntity.cs" />
     <Compile Include="BusinessData\BaseRepository.cs" />
     <Compile Include="Client\ClientUtils.cs" />
@@ -132,6 +139,10 @@
     <Compile Include="Helper\SPHelper.cs" />
     <Compile Include="Helper\Unsafe.cs" />
     <Compile Include="Helper\WebPropertyManager.cs" />
+    <Compile Include="IdentityModel\Impersonation.cs" />
+    <Compile Include="IdentityModel\ImpersonationA.cs" />
+    <Compile Include="IdentityModel\SafeTokenHandle.cs" />
+    <Compile Include="IdentityModel\WindowsClaimsAuthenticationManager.cs" />
     <Compile Include="Linq\EntityDiscussion.cs" />
     <Compile Include="Linq\EntityWikiPage.cs" />
     <Compile Include="Linq\EntityMessage.cs" />
