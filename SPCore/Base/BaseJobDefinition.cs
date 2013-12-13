@@ -5,11 +5,14 @@ using Microsoft.SharePoint;
 using Microsoft.SharePoint.Administration;
 using Microsoft.SharePoint.Utilities;
 using SPCore.Helper;
+using SPCore.Logging;
 
 namespace SPCore.Base
 {
     public abstract class BaseJobDefinition : SPJobDefinition
     {
+        readonly Logger _logger;
+
         #region [Properties]
 
         public IEnumerable<string> WebUrls
@@ -54,6 +57,8 @@ namespace SPCore.Base
             {
                 Title = DefaultJobTitle;
             }
+
+            _logger = new Logger(Title);
         }
 
         protected BaseJobDefinition(string jobName, SPService service, SPServer server, SPJobLockType targetType) :
@@ -68,6 +73,8 @@ namespace SPCore.Base
             {
                 Title = DefaultJobTitle;
             }
+
+            _logger = new Logger(Title);
         }
 
         protected BaseJobDefinition(string jobName, IEnumerable<string> webUrls, SPWebApplication webApp)
@@ -84,6 +91,8 @@ namespace SPCore.Base
             {
                 Title = DefaultJobTitle;
             }
+
+            _logger = new Logger(Title);
         }
 
         protected BaseJobDefinition(string jobName, SPWebApplication webApp)
@@ -98,6 +107,8 @@ namespace SPCore.Base
             {
                 Title = DefaultJobTitle;
             }
+
+            _logger = new Logger(Title);
         }
 
         #endregion
@@ -150,12 +161,13 @@ namespace SPCore.Base
             }
             catch (Exception ex)
             {
-                SPDiagnosticsService.Local.WriteTrace(0,
-                                                      new SPDiagnosticsCategory(this.Name, TraceSeverity.Unexpected,
-                                                                                EventSeverity.Error),
-                                                      TraceSeverity.Unexpected,
-                                                      string.Format("Web Url = {0}: {1}", web.Url, ex.Message),
-                                                      ex.StackTrace);
+                _logger.Error(ex);
+                //SPDiagnosticsService.Local.WriteTrace(0,
+                //                                      new SPDiagnosticsCategory(this.Name, TraceSeverity.Unexpected,
+                //                                                                EventSeverity.Error),
+                //                                      TraceSeverity.Unexpected,
+                //                                      string.Format("Web Url = {0}: {1}", web.Url, ex.Message),
+                //                                      ex.StackTrace);
             }
         }
 

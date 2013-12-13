@@ -5,23 +5,16 @@ namespace SPCore.Logging
     /// <summary>
     /// The factory for Trace loggers.
     /// </summary>
-    public class TraceLoggerFactory : ILoggerFactory
+    public class LoggerFactory : ILoggerFactory
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TraceLoggerFactory"/> class.
+        /// Initializes a new instance of the <see cref="LoggerFactory"/> class.
         /// </summary>
-        /// <param name="categoryName">Name of the category.</param>
         /// <param name="isDebugEnabled">if set to <c>true</c> sets if debug is enabled.</param>
-        public TraceLoggerFactory(string categoryName, bool isDebugEnabled)
+        public LoggerFactory(bool isDebugEnabled)
         {
-            this.CategoryName = categoryName;
             this.IsDebugEnabled = isDebugEnabled;
         }
-
-        /// <summary>
-        /// Gets or sets the name of the category.
-        /// </summary>
-        public string CategoryName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this instance is debug enabled.
@@ -37,7 +30,7 @@ namespace SPCore.Logging
         /// </returns>
         public ILogger Create(Type type)
         {
-            return new TraceLogger(type.FullName, this.CategoryName, this.IsDebugEnabled);
+            return new Logger(type.FullName, this.IsDebugEnabled);
         }
 
         /// <summary>
@@ -49,7 +42,7 @@ namespace SPCore.Logging
         /// </returns>
         public ILogger Create(string name)
         {
-            return new TraceLogger(name, this.CategoryName, this.IsDebugEnabled);
+            return new Logger(name, this.IsDebugEnabled);
         }
     }
 }

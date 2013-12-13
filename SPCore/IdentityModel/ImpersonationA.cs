@@ -33,7 +33,7 @@ namespace SPCore.IdentityModel
             Impersonate();
         }
 
-        public bool Impersonate()
+        public void Impersonate()
         {
             Authenticated = false;
 
@@ -57,8 +57,6 @@ namespace SPCore.IdentityModel
                     this._context = WindowsIdentity.Impersonate(this._handleDuplicate.DangerousGetHandle());
                 }
             }
-
-            return Authenticated;
         }
 
         public void Dispose()

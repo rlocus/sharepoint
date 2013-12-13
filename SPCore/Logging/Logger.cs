@@ -1,39 +1,34 @@
-﻿using Microsoft.SharePoint.Administration;
+﻿using Microsoft.SharePoint;
+using Microsoft.SharePoint.Administration;
 
 namespace SPCore.Logging
 {
     /// <summary>
     /// A logger that logs to SharePoint's ULS.
     /// </summary>
-    public class TraceLogger : ILogger
+    public class Logger : ILogger
     {
+        private InnerLogger _innerLogger;
         /// <summary>
-        /// Initializes a new instance of the <see cref="TraceLogger"/> class.
+        /// Initializes a new instance of the <see cref="Logger"/> class.
         /// </summary>
         /// <param name="name">The name.</param>
-        /// <param name="categoryName">Name of the category.</param>
         /// <param name="isDebugEnabled">if set to <c>true</c> [is debug enabled].</param>
-        public TraceLogger(string name, string categoryName, bool isDebugEnabled)
+        public Logger(string name, bool isDebugEnabled = false)
         {
             this.Name = name;
-            this.CategoryName = categoryName;
             this.IsDebugEnabled = isDebugEnabled;
         }
 
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Returns TRUE if debug-level logging is enabled.
         /// </summary>
-        public bool IsDebugEnabled { get; private set; }
-
-        /// <summary>
-        /// Gets the name of the category.
-        /// </summary>
-        public string CategoryName { get; private set; }
+        public bool IsDebugEnabled { get; set; }
 
         /// <summary>
         /// Output the message at the Debug level.
@@ -56,7 +51,7 @@ namespace SPCore.Logging
         {
             if (this.IsDebugEnabled)
             {
-                this.InnerLog(TraceSeverity.Verbose, format, args);
+                this.InnerLog(CategoryId.Debugging, TraceSeverity.Verbose, format, args);
             }
         }
 
@@ -76,7 +71,7 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Info(string format, params object[] args)
         {
-            this.InnerLog(TraceSeverity.Medium, format, args);
+            this.InnerLog(CategoryId.Information, TraceSeverity.Medium, format, args);
         }
 
         /// <summary>
@@ -95,7 +90,7 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Warn(string format, params object[] args)
         {
-            this.InnerLog(TraceSeverity.High, format, args);
+            this.InnerLog(CategoryId.Warning, TraceSeverity.High, format, args);
         }
 
         /// <summary>
@@ -114,7 +109,7 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Error(string format, params object[] args)
         {
-            this.InnerLog(TraceSeverity.Unexpected, format, args);
+            this.InnerLog(CategoryId.Error, TraceSeverity.Unexpected, format, args);
         }
 
         /// <summary>
@@ -133,23 +128,30 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Fatal(string format, params object[] args)
         {
-            this.InnerLog(TraceSeverity.Unexpected, format, args);
+            this.InnerLog(CategoryId.Fatal, TraceSeverity.Unexpected, format, args);
         }
 
         /// <summary>
         /// Logs to the ULS.
         /// </summary>
+        /// <param name="categoryId"></param>
         /// <param name="traceSeverity">The trace severity.</param>
         /// <param name="message">The message.</param>
         /// <param name="args">The message arguments.</param>
-        protected virtual void InnerLog(TraceSeverity traceSeverity, string message, params object[] args)
+        protected virtual void InnerLog(CategoryId categoryId, TraceSeverity traceSeverity, string message, params object[] args)
         {
-            SPDiagnosticsService.Local.WriteTrace(
-                0,
-                new SPDiagnosticsCategory(this.CategoryName, TraceSeverity.Medium, EventSeverity.Information),
-                traceSeverity,
-                this.Name + " - " + message, 
-                args);
+            SPSecurity.RunWithElevatedPrivileges(
+                () =>
+                {
+                    if (_innerLogger == null)
+                    {
+                        _innerLogger = new InnerLogger(Name);
+                    }
+
+                    SPDiagnosticsCategory category =
+                        _innerLogger.Areas[_innerLogger.Name].Categories[categoryId.ToString()];
+                    _innerLogger.WriteTrace(0, category, traceSeverity, message, args);
+                });
         }
     }
 }

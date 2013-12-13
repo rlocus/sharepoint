@@ -31,7 +31,7 @@ namespace SPCore.IdentityModel
             Impersonate();
         }
 
-        private bool Impersonate()
+        private void Impersonate()
         {
             Authenticated = LogonUser(_username, _domain, _password,
                            LOGON32_LOGON_NETWORK/*LOGON32_LOGON_NEW_CREDENTIALS*/, LOGON32_PROVIDER_DEFAULT, out this._handle);
@@ -42,7 +42,6 @@ namespace SPCore.IdentityModel
             }
 
             this._context = WindowsIdentity.Impersonate(this._handle.DangerousGetHandle());
-            return Authenticated;
         }
 
         public void Dispose()
