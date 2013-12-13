@@ -10,7 +10,7 @@ namespace SPCore.Logging
         /// <summary>
         /// Returns TRUE if debug-level logging is enabled.
         /// </summary>
-        bool IsDebugEnabled { get; }
+        bool IsDebugEnabled { get; set; }
 
         /// <summary>
         /// Output the message at the Debug level.
