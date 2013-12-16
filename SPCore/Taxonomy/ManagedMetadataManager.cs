@@ -22,6 +22,8 @@ namespace SPCore.Taxonomy
 
         public ManagedMetadataManager(TermStore termStore, string groupName)
         {
+            if (termStore == null) throw new ArgumentNullException("termStore");
+
             Delimiter = ",";
             UseDefaultImporter = false;
             Encoding = Encoding.UTF8;
@@ -225,7 +227,7 @@ namespace SPCore.Taxonomy
             //Get TermStore Groups
             GroupCollection groups = _termStore.Groups;
             //Find group that we want to Import to
-            Group thisGroup = groups.Where(g => g.Name == _groupName).SingleOrDefault();
+            Group thisGroup = groups.GetByName(_groupName);
 
             //Check that group exist
             if (thisGroup != null)
