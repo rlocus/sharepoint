@@ -26,16 +26,6 @@ namespace SPCore.Formula.Base
         }
 
         /// <summary>
-        /// Whether to use environments current culture or not.
-        /// 
-        /// If this property is set to false, InvariantCulture is used. 
-        /// Otherwise environments culture is used.
-        /// </summary>
-        public bool UseEnvironmentCulture { get; set; }
-
-    
-
-        /// <summary>
         /// By setting Culture property, you override environments CurrentCulture
         /// </summary>
         private CultureInfo _culture;
@@ -48,6 +38,14 @@ namespace SPCore.Formula.Base
         {
             _culture = culture;
         }
+
+        /// <summary>
+        /// Whether to use environments current culture or not.
+        /// 
+        /// If this property is set to false, InvariantCulture is used. 
+        /// Otherwise environments culture is used.
+        /// </summary>
+        public bool UseEnvironmentCulture { get; set; }
 
         public CultureInfo Culture
         {
