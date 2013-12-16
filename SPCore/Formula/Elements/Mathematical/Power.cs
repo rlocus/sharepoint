@@ -16,7 +16,7 @@ namespace SPCore.Formula.Elements.Mathematical
         {
             get 
             {
-                return "POWER({ValueLeft}" + SPFormulaBuilder.SectionSeparator + "{ValueRight})";
+                return "POWER({ValueLeft}" + SectionSeparator + "{ValueRight})";
             }
         }
 

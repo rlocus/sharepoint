@@ -16,7 +16,7 @@ namespace SPCore.Formula.Elements.Mathematical
         {
             get 
             {
-                return "ROUND({Value}" + SPFormulaBuilder.SectionSeparator + "{DecimalPlaces})";
+                return "ROUND({Value}" + SectionSeparator + "{DecimalPlaces})";
             }
         }
 

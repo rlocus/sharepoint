@@ -4,7 +4,7 @@ using SPCore.Formula.Base.Interfaces;
 
 namespace SPCore.Formula.Elements.Basic
 {
-    public class Int : ExtendedElement, IValueType, IConditionalType
+    public class Int : ExtendedElement, IValueType
     {
         [RequiredParameter]
         public IValueType Value;

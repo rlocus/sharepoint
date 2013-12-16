@@ -19,7 +19,7 @@ namespace SPCore.Formula.Elements.DateTime
         {
             get 
             {
-                return "DATEDIF({ValueLeft}" + SPFormulaBuilder.SectionSeparator + "{ValueRight}" + SPFormulaBuilder.SectionSeparator + "{Format})";
+                return "DATEDIF({ValueLeft}" + SectionSeparator + "{ValueRight}" + SectionSeparator + "{Format})";
             }
         }
 

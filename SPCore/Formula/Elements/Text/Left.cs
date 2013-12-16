@@ -16,7 +16,7 @@ namespace SPCore.Formula.Elements.Text
         {
             get 
             {
-                return "LEFT({ValueLeft}" + SPFormulaBuilder.SectionSeparator + "{ValueRight})";
+                return "LEFT({ValueLeft}" + SectionSeparator + "{ValueRight})";
             }
         }
 

@@ -16,7 +16,7 @@ namespace SPCore.Formula.Elements.Basic
         {
             get 
             {
-                return "TEXT({Value}" + SPFormulaBuilder.SectionSeparator + "{Format})";
+                return "TEXT({Value}" + SectionSeparator + "{Format})";
             }
         }
 

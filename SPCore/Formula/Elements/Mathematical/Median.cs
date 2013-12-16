@@ -31,7 +31,7 @@ namespace SPCore.Formula.Elements.Mathematical
 
                 if ((i + 1) < value.Length)
                 {
-                    sb.Append(SPFormulaBuilder.SectionSeparator);
+                    sb.Append(SectionSeparator);
                 }
             }
 

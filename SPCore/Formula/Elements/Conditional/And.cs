@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Text;
 using SPCore.Formula.Base;
 using SPCore.Formula.Base.Attributes;
 using SPCore.Formula.Base.Interfaces;
-using SPCore.Formula.Elements.Basic;
+using Expression = SPCore.Formula.Elements.Basic.Expression;
 
 namespace SPCore.Formula.Elements.Conditional
 {
@@ -33,7 +34,7 @@ namespace SPCore.Formula.Elements.Conditional
 
                 if ((i + 1) < conditions.Length)
                 {
-                    sb.Append(SPFormulaBuilder.SectionSeparator);
+                    sb.Append(SectionSeparator);
                 }
             }
 
@@ -43,7 +44,7 @@ namespace SPCore.Formula.Elements.Conditional
         /// <summary>
         /// Used to create: AND({Condition1}, {Condition2})
         /// </summary>
-        public And(params System.Linq.Expressions.Expression<Func<string>>[] conditionalExpressions)
+        public And(params Expression<Func<string>>[] conditionalExpressions)
         {
             StringBuilder sb = new StringBuilder(512);
 
@@ -53,7 +54,7 @@ namespace SPCore.Formula.Elements.Conditional
 
                 if ((i + 1) < conditionalExpressions.Length)
                 {
-                    sb.Append(SPFormulaBuilder.SectionSeparator);
+                    sb.Append(SectionSeparator);
                 }
             }
 

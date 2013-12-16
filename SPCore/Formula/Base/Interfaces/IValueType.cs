@@ -6,5 +6,6 @@ namespace SPCore.Formula.Base.Interfaces
     /// </summary>
     public interface IValueType
     {
+        //string SectionSeparator { get; }
     }
 }

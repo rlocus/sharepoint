@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
 using SPCore.Formula.Base.Attributes;
 using SPCore.Formula.Base.Interfaces;
@@ -10,6 +11,77 @@ namespace SPCore.Formula.Base
     /// </summary>
     public abstract class Element : IElementType
     {
+        /// <summary>
+        /// Exception is being thrown if total characters count of 
+        /// calculated field formula is bigger than this property value.
+        /// </summary>
+        private const int _MAXIMUM_FORMULA_LENGTH = 1024;
+
+        protected int MaximumFormulaLength
+        {
+            get
+            {
+                return _MAXIMUM_FORMULA_LENGTH;
+            }
+        }
+
+        /// <summary>
+        /// Whether to use environments current culture or not.
+        /// 
+        /// If this property is set to false, InvariantCulture is used. 
+        /// Otherwise environments culture is used.
+        /// </summary>
+        public bool UseEnvironmentCulture;
+
+        /// <summary>
+        /// By setting Culture property, you override environments CurrentCulture
+        /// </summary>
+        private readonly CultureInfo _culture;
+
+        protected Element()
+        {
+        }
+
+        protected Element(CultureInfo culture)
+        {
+            _culture = culture;
+        }
+
+        protected CultureInfo Culture
+        {
+            get
+            {
+                if (_culture == null)
+                {
+                    return UseEnvironmentCulture ? CultureInfo.CurrentCulture : CultureInfo.InvariantCulture;
+                }
+
+                return _culture;
+            }
+        }
+
+        /// <summary>
+        /// Current NumberFormatInfo that depends on Culture property value
+        /// </summary>
+        protected NumberFormatInfo NumberFormat
+        {
+            get
+            {
+                return Culture.NumberFormat;
+            }
+        }
+
+        /// <summary>
+        /// Element sections separator character that depends on current culture.
+        /// </summary>
+        protected string SectionSeparator
+        {
+            get
+            {
+                return NumberFormat.NumberDecimalSeparator == "," ? ";" : ",";
+            }
+        }
+
         /// <summary>
         /// Element template. Can contain {Property} or {Field}.
         /// </summary>
@@ -90,14 +162,12 @@ namespace SPCore.Formula.Base
                 }
             }
 
-            if (formula.Length > SPFormulaBuilder.MAXIMUM_FORMULA_LENGTH)
+            if (formula.Length > MaximumFormulaLength)
             {
                 throw new InvalidOperationException(String.Format("This formula contains {0} characters which is more than maximum allowed length.", formula.Length));
             }
 
             return formula;
         }
-
-
     }
 }

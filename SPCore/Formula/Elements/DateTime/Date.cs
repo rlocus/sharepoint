@@ -19,7 +19,7 @@ namespace SPCore.Formula.Elements.DateTime
         {
             get 
             {
-                return "DATE({Year}" + SPFormulaBuilder.SectionSeparator + "{Month}" + SPFormulaBuilder.SectionSeparator + "{Day})";
+                return "DATE({Year}" + SectionSeparator + "{Month}" + SectionSeparator + "{Day})";
             }
         }
 

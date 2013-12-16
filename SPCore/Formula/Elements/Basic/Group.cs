@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using SPCore.Formula.Base;
 using SPCore.Formula.Base.Attributes;
 using SPCore.Formula.Base.Interfaces;
@@ -29,7 +30,7 @@ namespace SPCore.Formula.Elements.Basic
         /// <summary>
         /// Used to create: ({Value})
         /// </summary>
-        public Group(System.Linq.Expressions.Expression<Func<string>> expression)
+        public Group(Expression<Func<string>> expression)
         {
             this.Value = new Expression(expression);
         }

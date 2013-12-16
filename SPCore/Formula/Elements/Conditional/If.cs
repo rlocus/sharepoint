@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq.Expressions;
 using SPCore.Formula.Base;
 using SPCore.Formula.Base.Attributes;
 using SPCore.Formula.Base.Interfaces;
-using SPCore.Formula.Elements.Basic;
+using Expression = SPCore.Formula.Elements.Basic.Expression;
 
 namespace SPCore.Formula.Elements.Conditional
 {
@@ -21,7 +22,7 @@ namespace SPCore.Formula.Elements.Conditional
         {
             get 
             {
-                return "IF({Condition}" + SPFormulaBuilder.SectionSeparator + "{CaseTrue}" + SPFormulaBuilder.SectionSeparator + "{CaseFalse})";
+                return "IF({Condition}" + SectionSeparator + "{CaseTrue}" + SectionSeparator + "{CaseFalse})";
             }
         }
 
@@ -38,7 +39,7 @@ namespace SPCore.Formula.Elements.Conditional
         /// <summary>
         /// Used to create: IF({Condition}, {CaseTrue}, {CaseFalse})
         /// </summary>
-        public If(System.Linq.Expressions.Expression<Func<string>> conditionalExpression, IValueType caseTrue, IValueType caseFalse)
+        public If(Expression<Func<string>> conditionalExpression, IValueType caseTrue, IValueType caseFalse)
         {
             this.Condition = new Expression(conditionalExpression);
             this.CaseTrue = caseTrue;
@@ -48,7 +49,7 @@ namespace SPCore.Formula.Elements.Conditional
         /// <summary>
         /// Used to create: IF({Condition}, {CaseTrue}, {CaseFalse})
         /// </summary>
-        public If(System.Linq.Expressions.Expression<Func<string>> conditionalExpression, System.Linq.Expressions.Expression<Func<string>> expressionTrue, IValueType caseFalse)
+        public If(Expression<Func<string>> conditionalExpression, Expression<Func<string>> expressionTrue, IValueType caseFalse)
         {
             this.Condition = new Expression(conditionalExpression);
             this.CaseTrue = new Expression(expressionTrue);
@@ -58,7 +59,7 @@ namespace SPCore.Formula.Elements.Conditional
         /// <summary>
         /// Used to create: IF({Condition}, {CaseTrue}, {CaseFalse})
         /// </summary>
-        public If(System.Linq.Expressions.Expression<Func<string>> conditionalExpression, System.Linq.Expressions.Expression<Func<string>> expressionTrue, System.Linq.Expressions.Expression<Func<string>> expressionFalse)
+        public If(Expression<Func<string>> conditionalExpression, Expression<Func<string>> expressionTrue, Expression<Func<string>> expressionFalse)
         {
             this.Condition = new Expression(conditionalExpression);
             this.CaseTrue = new Expression(expressionTrue);

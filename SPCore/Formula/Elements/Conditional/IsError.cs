@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq.Expressions;
 using SPCore.Formula.Base;
 using SPCore.Formula.Base.Attributes;
 using SPCore.Formula.Base.Interfaces;
-using SPCore.Formula.Elements.Basic;
+using Expression = SPCore.Formula.Elements.Basic.Expression;
 
 namespace SPCore.Formula.Elements.Conditional
 {
@@ -30,7 +31,7 @@ namespace SPCore.Formula.Elements.Conditional
         /// <summary>
         /// Used to create: ISERROR({Condition})
         /// </summary>
-        public IsError(System.Linq.Expressions.Expression<Func<string>> conditionalExpression)
+        public IsError(Expression<Func<string>> conditionalExpression)
         {
             this.Condition = new Expression(conditionalExpression);
         }

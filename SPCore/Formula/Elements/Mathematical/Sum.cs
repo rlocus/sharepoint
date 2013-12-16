@@ -21,7 +21,7 @@ namespace SPCore.Formula.Elements.Mathematical
         /// <summary>
         /// Used to create: SUM({Value[0]}, {Value[1]}, ...)
         /// </summary>
-        public Sum(params IValueType[] value)
+        public Sum(params IValueType[] value) : base()
         {
             StringBuilder sb = new StringBuilder(512);
 
@@ -31,7 +31,7 @@ namespace SPCore.Formula.Elements.Mathematical
 
                 if((i+1) < value.Length)
                 {
-                    sb.Append(SPFormulaBuilder.SectionSeparator);
+                    sb.Append(SectionSeparator);
                 }
             }
 
