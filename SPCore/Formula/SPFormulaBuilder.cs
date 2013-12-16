@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq.Expressions;
+using Microsoft.SharePoint;
 using SPCore.Formula.Base.Interfaces;
 using Basic = SPCore.Formula.Elements.Basic;
 
@@ -41,6 +42,26 @@ namespace SPCore.Formula
         public static string CreateFormula(Expression<Func<string>> expression, CultureInfo culture)
         {
             return new Basic.Formula(expression, culture).ToString();
+        }
+
+        public static void CreateFormula(SPField field, IValueType element, bool useEnvironmentCulture = false)
+        {
+            field.DefaultFormula = CreateFormula(element, useEnvironmentCulture);
+        }
+
+        public static void CreateFormula(SPField field, IValueType element, CultureInfo culture)
+        {
+            field.DefaultFormula = CreateFormula(element, culture);
+        }
+
+        public static void CreateFormula(SPField field, Expression<Func<string>> expression, bool useEnvironmentCulture = false)
+        {
+            field.DefaultFormula = CreateFormula(expression, useEnvironmentCulture);
+        }
+
+        public static void CreateFormula(SPField field, Expression<Func<string>> expression, CultureInfo culture)
+        {
+            field.DefaultFormula = CreateFormula(expression, culture);
         }
     }
 }
