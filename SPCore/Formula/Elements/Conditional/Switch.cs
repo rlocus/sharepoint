@@ -31,7 +31,7 @@ namespace SPCore.Formula.Elements.Conditional
 
             for (int i = 0; i < conditionCaseTruePair.Length; i++)
             {
-                sb.AppendFormat("IF({0}" + SectionSeparator + "{1}" + SectionSeparator, conditionCaseTruePair[i].Key.ToString(), conditionCaseTruePair[i].Value.ToString());
+                sb.AppendFormat("IF({0}" + SectionSeparator + "{1}" + SectionSeparator, conditionCaseTruePair[i].Key, conditionCaseTruePair[i].Value);
 
                 if ((i + 1) == conditionCaseTruePair.Length)
                 {

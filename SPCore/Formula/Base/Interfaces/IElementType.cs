@@ -1,4 +1,6 @@
 ﻿
+using System.Globalization;
+
 namespace SPCore.Formula.Base.Interfaces
 {
     /// <summary>
@@ -6,5 +8,7 @@ namespace SPCore.Formula.Base.Interfaces
     /// </summary>
     public interface IElementType
     {
+        bool UseEnvironmentCulture { get; set; }
+        CultureInfo Culture { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Text;
 using SPCore.Formula.Base;
 using SPCore.Formula.Base.Attributes;
@@ -89,7 +90,7 @@ namespace SPCore.Formula.Elements.Basic
         /// Used to create: {UnaryOperation}{Value}
         /// Used to create: {Value[0]}{BinaryOperator}{Value[1]}...{Value[n]}
         /// </summary>
-        public Expression(System.Linq.Expressions.Expression<Func<string>> operationExpression)
+        public Expression(Expression<Func<string>> operationExpression)
         {
             Func<string> deleg = operationExpression.Compile();
             this.Value = deleg();

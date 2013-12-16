@@ -31,12 +31,14 @@ namespace SPCore.Formula.Base
         /// If this property is set to false, InvariantCulture is used. 
         /// Otherwise environments culture is used.
         /// </summary>
-        public bool UseEnvironmentCulture;
+        public bool UseEnvironmentCulture { get; set; }
+
+    
 
         /// <summary>
         /// By setting Culture property, you override environments CurrentCulture
         /// </summary>
-        private readonly CultureInfo _culture;
+        private CultureInfo _culture;
 
         protected Element()
         {
@@ -47,7 +49,7 @@ namespace SPCore.Formula.Base
             _culture = culture;
         }
 
-        protected CultureInfo Culture
+        public CultureInfo Culture
         {
             get
             {
@@ -57,6 +59,10 @@ namespace SPCore.Formula.Base
                 }
 
                 return _culture;
+            }
+            set
+            {
+                _culture = value;
             }
         }
 
