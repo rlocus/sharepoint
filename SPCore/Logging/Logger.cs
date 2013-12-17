@@ -51,7 +51,7 @@ namespace SPCore.Logging
         {
             if (this.IsDebugEnabled)
             {
-                this.InnerLog(CategoryId.Debugging, TraceSeverity.Verbose, format, args);
+                this.InnerLog(CategoryId.Debug, TraceSeverity.Verbose, format, args);
             }
         }
 
@@ -71,7 +71,7 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Info(string format, params object[] args)
         {
-            this.InnerLog(CategoryId.Information, TraceSeverity.Medium, format, args);
+            this.InnerLog(CategoryId.Info, TraceSeverity.Medium, format, args);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace SPCore.Logging
         /// <param name="args">The arguments to pass to the formatter.</param>
         public void Warn(string format, params object[] args)
         {
-            this.InnerLog(CategoryId.Warning, TraceSeverity.High, format, args);
+            this.InnerLog(CategoryId.Warn, TraceSeverity.High, format, args);
         }
 
         /// <summary>
@@ -140,18 +140,18 @@ namespace SPCore.Logging
         /// <param name="args">The message arguments.</param>
         protected virtual void InnerLog(CategoryId categoryId, TraceSeverity traceSeverity, string message, params object[] args)
         {
-            SPSecurity.RunWithElevatedPrivileges(
-                () =>
-                {
-                    if (_innerLogger == null)
-                    {
-                        _innerLogger = new InnerLogger(Name);
-                    }
+            //SPSecurity.RunWithElevatedPrivileges(
+            //    () =>
+            //    {
+            if (_innerLogger == null)
+            {
+                _innerLogger = new InnerLogger(Name);
+            }
 
-                    SPDiagnosticsCategory category =
-                        _innerLogger.Areas[_innerLogger.Name].Categories[categoryId.ToString()];
-                    _innerLogger.WriteTrace(0, category, traceSeverity, message, args);
-                });
+            SPDiagnosticsCategory category =
+                _innerLogger.Areas[_innerLogger.Name].Categories[categoryId.ToString()];
+            _innerLogger.WriteTrace(0, category, traceSeverity, message, args);
+            //});
         }
     }
 }

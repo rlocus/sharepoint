@@ -26,7 +26,7 @@ namespace SPCore.Caml.Clauses
         public GroupBy(string fieldName, bool collapse)
             : base("GroupBy")
         {
-            FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName, Ascending = false } };
+            FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName/*, Ascending = false*/ } };
             Collapse = collapse;
         }
 

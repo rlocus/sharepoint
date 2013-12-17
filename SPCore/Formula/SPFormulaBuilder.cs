@@ -7,6 +7,28 @@ using Basic = SPCore.Formula.Elements.Basic;
 
 namespace SPCore.Formula
 {
+    ////Examples:
+    ////IF(Column1<=Column2, "OK", "Not OK")
+    //SPFormulaBuilder.CreateFormula(new If(
+    //                                       new Expression(
+    //                                             () =>
+    //                                                 new ColumnReference("Column1") <=
+    //                                                 new ColumnReference("Column2")
+    //                                              ),
+    //                                        new StringLiteral("OK"),
+    //                                        new StringLiteral("Not OK")
+    //                                        ));
+
+    ////DATE(YEAR(Column1)+Column2,MONTH(Column1),DAY(Column1))
+    //SPFormulaBuilder.CreateFormula(new Date(
+    //                                   new Expression(
+    //                                       () =>
+    //                                       new Year(new ColumnReference("Column1")) +
+    //                                       new ColumnReference("Column2")
+    //                                       ), new Month(new ColumnReference("Column1")),
+    //                                   new Day(new ColumnReference("Column1"))
+    //                                   ));
+
     public class SPFormulaBuilder
     {
         /// <summary>

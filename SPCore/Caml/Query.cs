@@ -36,13 +36,20 @@ namespace SPCore.Caml
             }
         }
 
-        private static string ConvertToString(IEnumerable<XElement> elements, SaveOptions saveOption)
+        private string ConvertToString(IEnumerable<XElement> elements, SaveOptions saveOption)
         {
             var sb = new StringBuilder();
 
             foreach (XElement element in elements)
             {
-                sb.Append(element.ToString(saveOption));
+                if (DisableFormatting)
+                {
+                    sb.Append(element.ToString(saveOption));
+                }
+                else
+                {
+                    sb.AppendLine(element.ToString(saveOption));
+                }
             }
 
             return sb.ToString();
@@ -57,14 +64,14 @@ namespace SPCore.Caml
                 el.Add(Where.ToXElement());
             }
 
-            if (GroupBy != null)
-            {
-                el.Add(GroupBy.ToXElement());
-            }
-
             if (OrderBy != null)
             {
                 el.Add(OrderBy.ToXElement());
+            }
+
+            if (GroupBy != null)
+            {
+                el.Add(GroupBy.ToXElement());
             }
 
             return el;
@@ -73,9 +80,9 @@ namespace SPCore.Caml
         public string ToString(bool includeQueryTag)
         {
             var caml = ToCaml();
-
+            var elements = caml.Elements();
             return !includeQueryTag
-                ? ConvertToString(caml.Element(QueryTag).Elements(), SaveOption)
+                ? ConvertToString(elements, SaveOption)
                 : caml.ToString(SaveOption);
         }
 
@@ -91,7 +98,7 @@ namespace SPCore.Caml
 
         public SPQuery ToSPQuery()
         {
-            var query = new SPQuery {Query = this.ToString()};
+            var query = new SPQuery { Query = this.ToString() };
             return query;
         }
     }
