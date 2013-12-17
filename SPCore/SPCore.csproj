@@ -98,6 +98,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\BaseFeatureReceiver.cs" />
     <Compile Include="Base\BaseJobDefinition.cs" />
     <Compile Include="Base\BaseLibraryDefinition.cs" />
     <Compile Include="Base\BaseListDefinition.cs" />

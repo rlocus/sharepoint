@@ -421,9 +421,29 @@ namespace SPCore
             }
         }
 
+        /// <summary>
+        /// Finds the list template corresponding to the specified name
+        /// </summary>
+        /// <param name="web">The current web</param>
+        /// <param name="templateName">The list template name</param>
+        /// <returns>The list template</returns>
+        public static SPListTemplate GetListTemplate(this SPWeb web, string templateName)
+        {
+            SPListTemplate template = web.ListTemplates.Cast<SPListTemplate>().FirstOrDefault(i => i.Name == templateName);
+            return template;
+        }
+
+        public static IEnumerable<TList> GetLists<TList>(this SPWeb web, SPBaseType baseType, string templateName)
+          where TList : SPList
+        {
+            SPListTemplate template = GetListTemplate(web, templateName);
+            return web.GetLists<TList>(template.BaseType, template);
+        }
+
         public static IEnumerable<TList> GetLists<TList>(this SPWeb web, SPBaseType baseType, SPListTemplate template)
            where TList : SPList
         {
+            if (template == null) throw new ArgumentNullException("template");
             return web.GetLists<TList>(template.BaseType, template.Type);
         }
 
