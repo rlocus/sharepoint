@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Xml.Linq;
 using SPCore.Caml.Operators;
 
@@ -17,17 +16,17 @@ namespace SPCore.Caml.Clauses
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
+            XElement el = base.ToXElement();
 
             if (Operators != null)
             {
                 foreach (Operator op in Operators)
                 {
-                    ele.Add(op.ToXElement());
+                    if (op != null) el.Add(op.ToXElement());
                 }
             }
 
-            return ele;
+            return el;
         }
     }
 }

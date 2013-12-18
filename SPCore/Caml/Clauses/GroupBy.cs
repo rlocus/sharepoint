@@ -32,15 +32,18 @@ namespace SPCore.Caml.Clauses
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
-            ele.Add(new XAttribute("Collapse", Collapse));
+            XElement el = base.ToXElement();
+            el.Add(new XAttribute("Collapse", Collapse));
 
-            foreach (var fieldRef in this.FieldRefs)
+            if (this.FieldRefs != null)
             {
-                ele.Add(fieldRef.ToXElement());
+                foreach (FieldRef fieldRef in this.FieldRefs)
+                {
+                    if (fieldRef != null) el.Add(fieldRef.ToXElement());
+                }
             }
 
-            return ele;
+            return el;
         }
     }
 }

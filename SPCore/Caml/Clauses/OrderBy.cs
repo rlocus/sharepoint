@@ -38,11 +38,14 @@ namespace SPCore.Caml.Clauses
 
         public override XElement ToXElement()
         {
-            var el = base.ToXElement();
+            XElement el = base.ToXElement();
 
-            foreach (FieldRef fieldRef in this.FieldRefs)
+            if (this.FieldRefs != null)
             {
-                el.Add(fieldRef.ToXElement());
+                foreach (FieldRef fieldRef in this.FieldRefs)
+                {
+                    if (fieldRef != null) el.Add(fieldRef.ToXElement());
+                }
             }
 
             return el;

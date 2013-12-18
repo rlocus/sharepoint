@@ -10,7 +10,7 @@ namespace SPCore.Formula.Elements.Basic
     public class Expression : ExtendedElement, IValueType
     {
         [RequiredParameter]
-        public string Value;
+        public string Value { get; set; }
 
         private readonly string _binaryOperator;
         private readonly string _comparisonOperator;

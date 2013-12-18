@@ -7,7 +7,7 @@ namespace SPCore.Formula.Elements.Text
     public class Lower : ExtendedElement, IValueType
     {
         [RequiredParameter]
-        public IValueType Value;
+        public IValueType Value { get; set; }
 
         protected override string Template
         {

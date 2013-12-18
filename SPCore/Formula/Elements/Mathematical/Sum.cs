@@ -8,7 +8,7 @@ namespace SPCore.Formula.Elements.Mathematical
     public class Sum : Element, IValueType
     {
         [RequiredParameter]
-        public string Value;
+        public string Value { get; set; }
 
         protected override string Template
         {

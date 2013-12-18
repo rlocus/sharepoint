@@ -7,7 +7,7 @@ namespace SPCore.Formula.Elements.Text
     public class Rept : ExtendedElement, IValueType
     {
         [RequiredParameter]
-        public IValueType ValueLeft;
+        public IValueType ValueLeft { get; set; }
 
         [RequiredParameter]
         public IValueType ValueRight;

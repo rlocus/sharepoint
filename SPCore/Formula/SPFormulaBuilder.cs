@@ -8,7 +8,7 @@ using Basic = SPCore.Formula.Elements.Basic;
 namespace SPCore.Formula
 {
     ////Examples:
-    ////IF(Column1<=Column2, "OK", "Not OK")
+    ////=IF(Column1<=Column2, "OK", "Not OK")
     //SPFormulaBuilder.CreateFormula(new If(
     //                                       new Expression(
     //                                             () =>
@@ -19,7 +19,7 @@ namespace SPCore.Formula
     //                                        new StringLiteral("Not OK")
     //                                        ));
 
-    ////DATE(YEAR(Column1)+Column2,MONTH(Column1),DAY(Column1))
+    ////=DATE(YEAR(Column1)+Column2,MONTH(Column1),DAY(Column1))
     //SPFormulaBuilder.CreateFormula(new Date(
     //                                   new Expression(
     //                                       () =>
@@ -28,6 +28,11 @@ namespace SPCore.Formula
     //                                       ), new Month(new ColumnReference("Column1")),
     //                                   new Day(new ColumnReference("Column1"))
     //                                   ));
+
+    ////=Column1+Column2+Column3
+    //SPFormulaBuilder.CreateFormula(
+    //               () =>
+    //               new ColumnReference("Column1") + new ColumnReference("Column2") + new ColumnReference("Column3"));
 
     public class SPFormulaBuilder
     {
@@ -42,14 +47,16 @@ namespace SPCore.Formula
         /// Used to create: "={Text}"
         /// Note: Formula class cannot be used directly. Instead of instantiating Formula class, use this method.
         /// </summary>
-        public static string CreateFormula(IValueType element, bool useEnvironmentCulture = false)
+        public static string CreateFormula<T>(T element, bool useEnvironmentCulture = false)
+            where T : Base.Element, IValueType, IElementType
         {
-            return new Basic.Formula(element) { UseEnvironmentCulture = useEnvironmentCulture }.ToString();
+            return new Basic.Formula<T>(element) { UseEnvironmentCulture = useEnvironmentCulture }.ToString();
         }
 
-        public static string CreateFormula(IValueType element, CultureInfo culture)
+        public static string CreateFormula<T>(T element, CultureInfo culture)
+            where T : Base.Element, IValueType, IElementType
         {
-            return new Basic.Formula(element, culture).ToString();
+            return new Basic.Formula<T>(element, culture).ToString();
         }
 
         /// <summary>
@@ -58,30 +65,32 @@ namespace SPCore.Formula
         /// </summary>
         public static string CreateFormula(Expression<Func<string>> expression, bool useEnvironmentCulture = false)
         {
-            return new Basic.Formula(expression) { UseEnvironmentCulture = useEnvironmentCulture }.ToString();
+            return new Basic.Formula<Basic.Expression>(expression) { UseEnvironmentCulture = useEnvironmentCulture }.ToString();
         }
 
         public static string CreateFormula(Expression<Func<string>> expression, CultureInfo culture)
         {
-            return new Basic.Formula(expression, culture).ToString();
+            return new Basic.Formula<Basic.Expression>(expression, culture).ToString();
         }
 
-        public static void CreateFormula(SPField field, IValueType element, bool useEnvironmentCulture = false)
+        public static void SetFormula<T>(SPField field, T element, bool useEnvironmentCulture = false)
+             where T : Base.Element, IValueType, IElementType
         {
             field.DefaultFormula = CreateFormula(element, useEnvironmentCulture);
         }
 
-        public static void CreateFormula(SPField field, IValueType element, CultureInfo culture)
+        public static void SetFormula<T>(SPField field, T element, CultureInfo culture)
+             where T : Base.Element, IValueType, IElementType
         {
             field.DefaultFormula = CreateFormula(element, culture);
         }
 
-        public static void CreateFormula(SPField field, Expression<Func<string>> expression, bool useEnvironmentCulture = false)
+        public static void SetFormula(SPField field, Expression<Func<string>> expression, bool useEnvironmentCulture = false)
         {
             field.DefaultFormula = CreateFormula(expression, useEnvironmentCulture);
         }
 
-        public static void CreateFormula(SPField field, Expression<Func<string>> expression, CultureInfo culture)
+        public static void SetFormula(SPField field, Expression<Func<string>> expression, CultureInfo culture)
         {
             field.DefaultFormula = CreateFormula(expression, culture);
         }
