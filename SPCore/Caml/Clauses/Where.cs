@@ -15,7 +15,6 @@ namespace SPCore.Caml.Clauses
 
         public void And<T>(T op)
             where T : Operator, IFieldOperator
-
         {
             if (op == null) throw new ArgumentNullException("op");
 
@@ -27,7 +26,8 @@ namespace SPCore.Caml.Clauses
                             };
         }
 
-        public void Or(Operator op)
+        public void Or<T>(T op)
+             where T : Operator, IFieldOperator
         {
             if (op == null) throw new ArgumentNullException("op");
 

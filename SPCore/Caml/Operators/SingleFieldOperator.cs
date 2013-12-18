@@ -3,7 +3,7 @@ using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class SingleFieldOperator : Operator, IFieldOperator
+    public abstract class SingleFieldOperator : Operator, ISingleFieldOperator
     {
         public FieldRef FieldRef { get; set; }
 

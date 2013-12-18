@@ -5,7 +5,7 @@ using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class SingleFieldValueOperator<T> : ValueOperator<T>, IFieldOperator
+    public abstract class SingleFieldValueOperator<T> : ValueOperator<T>, ISingleFieldOperator
     {
         public FieldRef FieldRef { get; set; }
 

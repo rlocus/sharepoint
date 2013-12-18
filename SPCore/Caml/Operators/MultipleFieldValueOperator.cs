@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
+using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class MultipleFieldValueOperator<T> : ValueOperator<T>
+    public abstract class MultipleFieldValueOperator<T> : ValueOperator<T>, IMultiFieldOperator
     {
         public IEnumerable<FieldRef> FieldRefs { get; set; }
 

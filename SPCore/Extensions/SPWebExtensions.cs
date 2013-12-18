@@ -429,7 +429,9 @@ namespace SPCore
         /// <returns>The list template</returns>
         public static SPListTemplate GetListTemplate(this SPWeb web, string templateName)
         {
-            SPListTemplate template = web.ListTemplates.Cast<SPListTemplate>().FirstOrDefault(i => i.Name == templateName);
+            SPListTemplate template =
+                web.ListTemplates.Cast<SPListTemplate>().FirstOrDefault(
+                    lt => lt.Name.Equals(templateName, StringComparison.InvariantCultureIgnoreCase));
             return template;
         }
 
@@ -663,29 +665,7 @@ namespace SPCore
             PublishingPage newPage = publishingWeb.AddPublishingPage(pageName, pageLayout);
             return newPage;
         }
-
-        //public static Boolean DoesUserHavePermissions(this SPWeb web, String listTitle, out SPList list)
-        //{
-        //    Boolean catchException = SPSecurity.CatchAccessDeniedException;
-        //    SPSecurity.CatchAccessDeniedException = false;
-
-        //    try
-        //    {
-        //        list = web.Lists[listTitle];
-        //        return true;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        list = null;
-        //        return false;
-        //    }
-        //    finally
-        //    {
-        //        //reset the flag to original value
-        //        SPSecurity.CatchAccessDeniedException = catchException;
-        //    }
-        //}
-
+        
         /// <summary>
         /// Checks if the custom action is contained in the SPUserCustomActionCollection and if so, 
         /// returns the id in the customActionId parameter

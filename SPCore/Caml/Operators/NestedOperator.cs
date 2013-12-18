@@ -15,12 +15,14 @@ namespace SPCore.Caml.Operators
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
-            foreach (var op in Operators)
+            XElement el = base.ToXElement();
+            
+            foreach (Operator op in Operators)
             {
-                ele.Add(op.ToXElement());
+                el.Add(op.ToXElement());
             }
-            return ele;
+
+            return el;
         }
     }
 }

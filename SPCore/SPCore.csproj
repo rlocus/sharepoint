@@ -113,6 +113,9 @@
     <Compile Include="Caml\Clauses\Where.cs" />
     <Compile Include="Caml\Extensions.cs" />
     <Compile Include="Caml\FieldRef.cs" />
+    <Compile Include="Caml\Interfaces\IFieldOperator.cs" />
+    <Compile Include="Caml\Interfaces\IMultiFieldOperator.cs" />
+    <Compile Include="Caml\Interfaces\ISingleFieldOperator.cs" />
     <Compile Include="Caml\Operators\And.cs" />
     <Compile Include="Caml\Operators\BeginsWith.cs" />
     <Compile Include="Caml\Operators\Contains.cs" />

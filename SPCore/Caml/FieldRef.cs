@@ -9,6 +9,7 @@ namespace SPCore.Caml
         public string Name { get; set; }
         public bool? Ascending { get; set; }
         public bool? IncludeTimeValue { get; set; }
+        public bool? Nullable { get; set; }
 
         public FieldRef()
             : base("FieldRef")
@@ -33,6 +34,10 @@ namespace SPCore.Caml
             if (IncludeTimeValue.HasValue)
             {
                 ele.Add(new XAttribute("IncludeTimeValue", IncludeTimeValue.Value));
+            }
+            if (Nullable.HasValue)
+            {
+                ele.Add(new XAttribute("Nullable", Nullable.Value));
             }
             return ele;
         }

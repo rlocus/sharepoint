@@ -1,5 +1,7 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
+using Microsoft.SharePoint.Utilities;
 
 namespace SPCore.Caml
 {
@@ -19,7 +21,18 @@ namespace SPCore.Caml
         {
             var ele = base.ToXElement();
             ele.Add(new XAttribute("Type", Type));
-            ele.Value = Val.ToString();
+
+            if (SPFieldType.DateTime == this.Type)
+            {
+                if (typeof(T) == typeof(DateTime))
+                {
+                    ele.Value = SPUtility.CreateISO8601DateTimeFromSystemDateTime(Convert.ToDateTime(Val));
+                }
+            }
+            else
+            {
+                ele.Value = Val.ToString();
+            }
             return ele;
         }
     }
