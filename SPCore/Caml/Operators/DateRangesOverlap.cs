@@ -42,16 +42,16 @@ namespace SPCore.Caml.Operators
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
+            XElement el = base.ToXElement();
 
             if (_enumValue.HasValue)
             {
-                XElement value = ele.Elements("Value").Single();
+                XElement value = el.Elements("Value").Single();
                 value.Value = string.Empty;
                 value.Add(new XElement(_enumValue.ToString()));
             }
 
-            return ele;
+            return el;
         }
     }
 }

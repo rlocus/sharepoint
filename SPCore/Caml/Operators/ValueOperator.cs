@@ -15,9 +15,9 @@ namespace SPCore.Caml.Operators
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
-            if (Value != null) ele.Add(Value.ToXElement());
-            return ele;
+            XElement el = base.ToXElement();
+            if (Value != null) el.Add(Value.ToXElement());
+            return el;
         }
     }
 }

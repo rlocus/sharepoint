@@ -18,28 +18,29 @@ namespace SPCore.Caml
 
         public override XElement ToXElement()
         {
-            var ele = new XElement("FieldRef");
+            XElement el = new XElement("FieldRef");
+
             if (FieldId != Guid.Empty)
             {
-                ele.Add(new XAttribute("ID", FieldId));
+                el.Add(new XAttribute("ID", FieldId));
             }
             else if (!string.IsNullOrEmpty(Name))
             {
-                ele.Add(new XAttribute("Name", Name));
+                el.Add(new XAttribute("Name", Name));
             }
             if (Ascending.HasValue)
             {
-                ele.Add(new XAttribute("Ascending", Ascending.Value));
+                el.Add(new XAttribute("Ascending", Ascending.Value));
             }
             if (IncludeTimeValue.HasValue)
             {
-                ele.Add(new XAttribute("IncludeTimeValue", IncludeTimeValue.Value));
+                el.Add(new XAttribute("IncludeTimeValue", IncludeTimeValue.Value));
             }
             if (Nullable.HasValue)
             {
-                ele.Add(new XAttribute("Nullable", Nullable.Value));
+                el.Add(new XAttribute("Nullable", Nullable.Value));
             }
-            return ele;
+            return el;
         }
     }
 }

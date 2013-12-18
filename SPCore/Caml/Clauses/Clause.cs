@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using SPCore.Caml.Operators;
 
@@ -20,9 +21,9 @@ namespace SPCore.Caml.Clauses
 
             if (Operators != null)
             {
-                foreach (Operator op in Operators)
+                foreach (Operator op in Operators.Where(op => op != null))
                 {
-                    if (op != null) el.Add(op.ToXElement());
+                    el.Add(op.ToXElement());
                 }
             }
 

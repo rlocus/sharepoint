@@ -79,8 +79,8 @@ namespace SPCore.Caml
 
         public string ToString(bool includeQueryTag)
         {
-            var caml = ToCaml();
-            var elements = caml.Elements();
+            XElement caml = ToCaml();
+            IEnumerable<XElement> elements = caml.Elements();
             return !includeQueryTag
                 ? ConvertToString(elements, SaveOption)
                 : caml.ToString(SaveOption);
@@ -93,7 +93,7 @@ namespace SPCore.Caml
 
         public static implicit operator string(Query query)
         {
-            return query.ToString();
+            return query != null ? query.ToString() : string.Empty;
         }
 
         public SPQuery ToSPQuery()

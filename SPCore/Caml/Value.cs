@@ -19,21 +19,22 @@ namespace SPCore.Caml
 
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
-            ele.Add(new XAttribute("Type", Type));
+            XElement el = base.ToXElement();
+            el.Add(new XAttribute("Type", Type));
 
             if (SPFieldType.DateTime == this.Type)
             {
                 if (typeof(T) == typeof(DateTime))
                 {
-                    ele.Value = SPUtility.CreateISO8601DateTimeFromSystemDateTime(Convert.ToDateTime(Val));
+                    el.Value = SPUtility.CreateISO8601DateTimeFromSystemDateTime(Convert.ToDateTime(Val));
                 }
             }
             else
             {
-                ele.Value = Val.ToString();
+                el.Value = Convert.ToString(Val);
             }
-            return ele;
+
+            return el;
         }
     }
 }
