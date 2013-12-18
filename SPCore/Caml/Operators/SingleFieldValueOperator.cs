@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
+using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class SingleFieldValueOperator<T> : ValueOperator<T>
+    public abstract class SingleFieldValueOperator<T> : ValueOperator<T>, IFieldOperator
     {
         public FieldRef FieldRef { get; set; }
 

@@ -46,7 +46,7 @@ namespace SPCore.Caml.Operators
 
             if (_enumValue.HasValue)
             {
-                var value = ele.Elements("Value").Single();
+                XElement value = ele.Elements("Value").Single();
                 value.Value = string.Empty;
                 value.Add(new XElement(_enumValue.ToString()));
             }

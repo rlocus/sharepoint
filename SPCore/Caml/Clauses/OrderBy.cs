@@ -14,38 +14,38 @@ namespace SPCore.Caml.Clauses
             this.FieldRefs = fieldRefs;
         }
 
-        public OrderBy(Guid fieldId, bool ascending)
+        public OrderBy(string fieldName)
+            : this(fieldName, null)
+        {
+        }
+
+        public OrderBy(Guid fieldId)
+            : this(fieldId, null)
+        {
+        }
+
+        public OrderBy(Guid fieldId, bool? ascending)
             : base("OrderBy")
         {
             this.FieldRefs = new FieldRef[] { new FieldRef() { FieldId = fieldId, Ascending = ascending } };
         }
 
-        public OrderBy(string fieldName, bool ascending)
+        public OrderBy(string fieldName, bool? ascending)
             : base("OrderBy")
         {
             this.FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName, Ascending = ascending } };
         }
 
-        public OrderBy(string fieldName)
-            : this(fieldName, false)
-        {
-        }
-
-        public OrderBy(Guid fieldId)
-            : this(fieldId, false)
-        {
-        }
-
         public override XElement ToXElement()
         {
-            var ele = base.ToXElement();
+            var el = base.ToXElement();
 
-            foreach (var fieldRef in this.FieldRefs)
+            foreach (FieldRef fieldRef in this.FieldRefs)
             {
-                ele.Add(fieldRef.ToXElement());
+                el.Add(fieldRef.ToXElement());
             }
 
-            return ele;
+            return el;
         }
     }
 }

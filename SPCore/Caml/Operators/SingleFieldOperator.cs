@@ -1,12 +1,13 @@
 ﻿using System.Xml.Linq;
+using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class SingleFieldOperator : Operator
+    public abstract class SingleFieldOperator : Operator, IFieldOperator
     {
         public FieldRef FieldRef { get; set; }
 
-        public SingleFieldOperator(string operatorName, FieldRef fieldRef)
+        protected SingleFieldOperator(string operatorName, FieldRef fieldRef)
             : base(operatorName)
         {
             FieldRef = fieldRef;
