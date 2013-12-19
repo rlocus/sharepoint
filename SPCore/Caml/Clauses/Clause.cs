@@ -15,6 +15,16 @@ namespace SPCore.Caml.Clauses
             Operators = operators;
         }
 
+        protected Clause(string clauseName, string existingClause)
+            : base(clauseName, existingClause)
+        {
+        }
+
+        protected Clause(string clauseName, XElement existingClause)
+            : base(clauseName, existingClause)
+        {
+        }
+
         public override XElement ToXElement()
         {
             XElement el = base.ToXElement();

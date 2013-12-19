@@ -14,15 +14,37 @@ namespace SPCore.Caml.Operators
         protected MultipleFieldValueOperator(string operatorName, IEnumerable<string> fieldNames, T value, SPFieldType type)
             : base(operatorName, value, type)
         {
-            var fieldRefs = fieldNames.Select(fieldName => new FieldRef() { Name = fieldName }).ToList();
+            var fieldRefs = fieldNames.Select(fieldName => new FieldRef() { Name = fieldName })/*.ToList()*/;
             FieldRefs = fieldRefs;
         }
 
         protected MultipleFieldValueOperator(string operatorName, IEnumerable<Guid> fieldIds, T value, SPFieldType type)
             : base(operatorName, value, type)
         {
-            var fieldRefs = fieldIds.Select(fieldId => new FieldRef() { FieldId = fieldId }).ToList();
+            var fieldRefs = fieldIds.Select(fieldId => new FieldRef() { FieldId = fieldId })/*.ToList()*/;
             FieldRefs = fieldRefs;
+        }
+
+        protected MultipleFieldValueOperator(string operatorName, string existingSingleFieldValueOperator)
+            : base(operatorName, existingSingleFieldValueOperator)
+        {
+        }
+
+        protected MultipleFieldValueOperator(string operatorName, XElement existingSingleFieldValueOperator)
+            : base(operatorName, existingSingleFieldValueOperator)
+        {
+        }
+
+        protected override void OnParsing(XElement existingMultipleFieldValueOperator)
+        {
+            var existingFieldRefs = existingMultipleFieldValueOperator.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
+            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "Value");
+
+            if (existingValue != null)
+            {
+                base.OnParsing(existingValue);
+            }
         }
 
         public override XElement ToXElement()

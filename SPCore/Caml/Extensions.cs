@@ -2,11 +2,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using SPCore.Caml.Clauses;
+using SPCore.Caml.Interfaces;
+using SPCore.Caml.Operators;
 
 namespace SPCore.Caml
 {
     public static class Extensions
     {
+        public static Where CombineAnd<T>(this Where where, T op)
+           where T : Operator, IFieldOperator
+        {
+            where.And(op);
+            return where;
+        }
+
+        public static Where CombineOr<T>(this Where where, T op)
+           where T : Operator, IFieldOperator
+        {
+            where.Or(op);
+            return where;
+        }
+
         public static OrderBy ThenBy(this OrderBy orderBy, Guid fieldId)
         {
             return orderBy.ThenBy(fieldId, false);

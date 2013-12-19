@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
 using SPCore.Caml.Clauses;
+using SPCore.Caml.Interfaces;
+using SPCore.Caml.Operators;
 
 namespace SPCore.Caml
 {
@@ -55,7 +58,7 @@ namespace SPCore.Caml
             return sb.ToString();
         }
 
-        public XElement ToCaml()
+        private XElement ToCaml()
         {
             var el = new XElement(QueryTag);
 
@@ -100,6 +103,47 @@ namespace SPCore.Caml
         {
             var query = new SPQuery { Query = this.ToString() };
             return query;
+        }
+
+        public SPQuery ToSPQuery(params string[] viewFields)
+        {
+            SPQuery query = ToSPQuery();
+            return query.WithViewFields(viewFields);
+        }
+
+        public static Query Parse(string existingQuery)
+        {
+            if (string.IsNullOrEmpty(existingQuery))
+            {
+                return null;
+            }
+
+            XElement el = XElement.Parse(existingQuery, LoadOptions.PreserveWhitespace);
+            return Parse(el);
+        }
+
+        public static Query Parse(XElement existingQuery)
+        {
+            Query query = new Query();
+
+            if (existingQuery != null && (existingQuery.HasElements && existingQuery.Name.LocalName == QueryTag))
+            {
+                XElement existingWhere = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "Where");
+                query.Where = new Where(existingWhere);
+                XElement existingOrderBy = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "OrderBy");
+                query.OrderBy = new OrderBy(existingOrderBy);
+                XElement existingGroupBy = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "GroupBy");
+                query.GroupBy = new GroupBy(existingGroupBy);
+            }
+
+            return query;
+        }
+
+        public static Query Combine(Query firstQuery, Query secondQuery)
+        {
+            Query newQuery = new Query();
+            newQuery.Where = Where.Combine(firstQuery.Where, secondQuery.Where);
+            return newQuery;
         }
     }
 }

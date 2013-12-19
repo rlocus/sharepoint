@@ -13,10 +13,37 @@ namespace SPCore.Caml.Operators
             Operators = operators;
         }
 
+        protected NestedOperator(string operatorName, string existingNestedOperator)
+            : base(operatorName, existingNestedOperator)
+        {
+        }
+
+        protected NestedOperator(string operatorName, XElement existingNestedOperator)
+            : base(operatorName, existingNestedOperator)
+        {
+        }
+
+        protected override void OnParsing(XElement existingNestedOperator)
+        {
+            List<Operator> operators = new List<Operator>();
+
+            foreach (XElement element in existingNestedOperator.Elements())
+            {
+                var op = GetOperator(element);
+
+                if (op != null)
+                {
+                   operators.Add(op);
+                }
+            }
+
+            this.Operators = operators;
+        }
+
         public override XElement ToXElement()
         {
             XElement el = base.ToXElement();
-            
+
             foreach (Operator op in Operators)
             {
                 el.Add(op.ToXElement());

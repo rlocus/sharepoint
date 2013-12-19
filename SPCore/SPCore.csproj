@@ -266,6 +266,7 @@
     <Compile Include="Taxonomy\ManagedMetadataManager.cs" />
     <Compile Include="Taxonomy\TermStoreNotFoundException.cs" />
     <Compile Include="UI\PeopleEditorExtensions.cs" />
+    <Compile Include="UI\SPGridViewExtensions.cs" />
     <Compile Include="UI\SPPagedDataSource.cs" />
     <Compile Include="Taxonomy\TaxonomyHelper.cs" />
     <Compile Include="Base\View.cs" />

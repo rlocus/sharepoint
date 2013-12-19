@@ -164,7 +164,7 @@ namespace SPCore
 
             do
             {
-                SPListItemCollection items = list.GetItems(spQuery.GetView(SPViewScope.Recursive));
+                SPListItemCollection items = list.GetItems(spQuery.WithViewScope(SPViewScope.Recursive));
                 listItemCollectionPosition = items.ListItemCollectionPosition;
 
                 if (list.ItemCount != 0)
@@ -349,7 +349,7 @@ namespace SPCore
                             {
                                 Query = string.Format("<Where>{0}</Where>", conditionQuery)
                             };
-                query = query.GetView(SPViewScope.Recursive);
+                query = query.WithViewScope(SPViewScope.Recursive);
             }
             else
             {

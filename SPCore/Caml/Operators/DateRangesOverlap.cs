@@ -7,6 +7,7 @@ namespace SPCore.Caml.Operators
 {
     public enum DateRangesOverlapValue
     {
+        Now,
         Today,
         Day,
         Week,
@@ -38,6 +39,46 @@ namespace SPCore.Caml.Operators
             : base("DateRangesOverlap", fieldNames, DateTime.MinValue, SPFieldType.DateTime)
         {
             _enumValue = value;
+        }
+
+        public DateRangesOverlap(string existingDateRangesOverlapOperator)
+            : base("DateRangesOverlap", existingDateRangesOverlapOperator)
+        {
+        }
+
+        public DateRangesOverlap(XElement existingDateRangesOverlapOperator)
+            : base("DateRangesOverlap", existingDateRangesOverlapOperator)
+        {
+        }
+
+        protected override void OnParsing(XElement existingMultipleFieldValueOperator)
+        {
+            base.OnParsing(existingMultipleFieldValueOperator);
+
+            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "Value");
+
+            if (existingValue != null && existingValue.HasElements)
+            {
+                DateRangesOverlapValue[] dateRangesOverlaps = new[]
+                                                                  {
+                                                                      DateRangesOverlapValue.Now,
+                                                                      DateRangesOverlapValue.Today,
+                                                                      DateRangesOverlapValue.Day,
+                                                                      DateRangesOverlapValue.Week,
+                                                                      DateRangesOverlapValue.Month,
+                                                                      DateRangesOverlapValue.Year
+                                                                  };
+
+                foreach (XElement element in existingValue.Elements())
+                {
+                    if (dateRangesOverlaps.Any(dateRangesOverlap => dateRangesOverlap.ToString() == element.Name.LocalName))
+                    {
+                        _enumValue =
+                            (DateRangesOverlapValue)Enum.Parse(typeof(DateRangesOverlapValue), element.Name.LocalName);
+                        break;
+                    }
+                }
+            }
         }
 
         public override XElement ToXElement()

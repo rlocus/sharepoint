@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Caml.Operators
@@ -12,6 +13,16 @@ namespace SPCore.Caml.Operators
 
         public Gt(string fieldName, T value, SPFieldType type)
             : base("Gt", fieldName, value, type)
+        {
+        }
+
+        public Gt(string existingGtOperator)
+            : base("Gt", existingGtOperator)
+        {
+        }
+
+        public Gt(XElement existingGtOperator)
+            : base("Gt", existingGtOperator)
         {
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 
 namespace SPCore.Caml.Operators
 {
@@ -11,6 +12,11 @@ namespace SPCore.Caml.Operators
 
         public IsNull(string fieldName)
             : base("IsNull", new FieldRef() { Name = fieldName })
+        {
+        }
+
+        public IsNull(XElement existingIsNullOperator)
+            : base("IsNull", existingIsNullOperator)
         {
         }
     }

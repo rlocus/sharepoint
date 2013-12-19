@@ -13,6 +13,21 @@ namespace SPCore.Caml.Operators
             Value = new Value<T>(value, type);
         }
 
+        protected ValueOperator(string operatorName, string existingValueOperator)
+            : base(operatorName, existingValueOperator)
+        {
+        }
+
+        protected ValueOperator(string operatorName, XElement existingValueOperator)
+            : base(operatorName, existingValueOperator)
+        {
+        }
+
+        protected override void OnParsing(XElement existingValueOperator)
+        {
+            Value = new Value<T>(existingValueOperator);
+        }
+
         public override XElement ToXElement()
         {
             XElement el = base.ToXElement();

@@ -8,12 +8,65 @@ namespace SPCore.Caml
         public Guid FieldId { get; set; }
         public string Name { get; set; }
         public bool? Ascending { get; set; }
-        public bool? IncludeTimeValue { get; set; }
         public bool? Nullable { get; set; }
+        public bool? LookupId { get; set; }
 
         public FieldRef()
             : base("FieldRef")
         {
+        }
+
+        public FieldRef(string existingFieldRef)
+            : base("FieldRef", existingFieldRef)
+        {
+        }
+
+        public FieldRef(XElement existingFieldRef)
+            : base("FieldRef", existingFieldRef)
+        {
+        }
+
+        protected override void OnParsing(XElement existingFieldRef)
+        {
+            XAttribute name = existingFieldRef.Attribute("Name");
+
+            if (name != null)
+            {
+                Name = name.Value;
+            }
+
+            XAttribute id = existingFieldRef.Attribute("ID");
+
+            if (id != null)
+            {
+                string guidString = id.Value.Trim();
+
+                if (guidString.Length > 0)
+                {
+                    FieldId = new Guid(guidString);
+                }
+            }
+
+            XAttribute ascending = existingFieldRef.Attribute("Ascending");
+
+            if (ascending != null)
+            {
+                Ascending = Convert.ToBoolean(ascending.Value);
+            }
+
+            XAttribute nullable = existingFieldRef.Attribute("Nullable");
+
+            if (nullable != null)
+            {
+                Nullable = Convert.ToBoolean(nullable.Value);
+            }
+
+            XAttribute lookupId = existingFieldRef.Attribute("LookupId");
+
+            if (lookupId != null)
+            {
+                LookupId = Convert.ToBoolean(lookupId.Value);
+            }
         }
 
         public override XElement ToXElement()
@@ -32,15 +85,20 @@ namespace SPCore.Caml
             {
                 el.Add(new XAttribute("Ascending", Ascending.Value));
             }
-            if (IncludeTimeValue.HasValue)
-            {
-                el.Add(new XAttribute("IncludeTimeValue", IncludeTimeValue.Value));
-            }
             if (Nullable.HasValue)
             {
                 el.Add(new XAttribute("Nullable", Nullable.Value));
             }
+            if (LookupId.HasValue)
+            {
+                el.Add(new XAttribute("LookupId", LookupId.Value));
+            }
             return el;
+        }
+
+        public override string ToString()
+        {
+            return ToXElement().ToString();
         }
     }
 }

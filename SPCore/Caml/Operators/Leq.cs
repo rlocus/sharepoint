@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Caml.Operators
@@ -12,6 +13,16 @@ namespace SPCore.Caml.Operators
 
         public Leq(string fieldName, T value, SPFieldType type)
             : base("Leq", fieldName, value, type)
+        {
+        }
+
+        public Leq(string existingLeqOperator)
+            : base("Leq", existingLeqOperator)
+        {
+        }
+
+        public Leq(XElement existingLeqOperator)
+            : base("Gt", existingLeqOperator)
         {
         }
     }

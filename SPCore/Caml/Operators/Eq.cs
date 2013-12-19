@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Caml.Operators
@@ -12,6 +13,16 @@ namespace SPCore.Caml.Operators
 
         public Eq(string fieldName, T value, SPFieldType type)
             : base("Eq", fieldName, value, type)
+        {
+        }
+
+        public Eq(string existingEqOperator)
+            : base("Eq", existingEqOperator)
+        {
+        }
+
+        public Eq(XElement existingEqOperator)
+            : base("Eq", existingEqOperator)
         {
         }
     }

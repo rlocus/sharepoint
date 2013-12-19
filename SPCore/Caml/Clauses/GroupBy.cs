@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace SPCore.Caml.Clauses
@@ -19,15 +20,38 @@ namespace SPCore.Caml.Clauses
         public GroupBy(Guid fieldId, bool collapse)
             : base("GroupBy")
         {
-            FieldRefs = new FieldRef[] { new FieldRef() { FieldId = fieldId, Ascending = false } };
+            FieldRefs = new FieldRef[] { new FieldRef() { FieldId = fieldId } };
             Collapse = collapse;
         }
 
         public GroupBy(string fieldName, bool collapse)
             : base("GroupBy")
         {
-            FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName/*, Ascending = false*/ } };
+            FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName } };
             Collapse = collapse;
+        }
+
+        public GroupBy(string existingGroupBy)
+            : base("GroupBy", existingGroupBy)
+        {
+        }
+
+        public GroupBy(XElement existingGroupBy)
+            : base("GroupBy", existingGroupBy)
+        {
+        }
+
+        protected override void OnParsing(XElement existingGroupBy)
+        {
+            var existingFieldRefs = existingGroupBy.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
+
+            XAttribute collaps = existingGroupBy.Attribute("Collapse");
+
+            if (collaps != null)
+            {
+                Collapse = Convert.ToBoolean(collaps.Value);
+            }
         }
 
         public override XElement ToXElement()

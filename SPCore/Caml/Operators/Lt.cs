@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Caml.Operators
@@ -12,6 +13,16 @@ namespace SPCore.Caml.Operators
 
         public Lt(string fieldName, T value, SPFieldType type)
             : base("Lt", fieldName, value, type)
+        {
+        }
+
+        public Lt(string existingLtOperator)
+            : base("Lt", existingLtOperator)
+        {
+        }
+
+        public Lt(XElement existingLtOperator)
+            : base("Lt", existingLtOperator)
         {
         }
     }

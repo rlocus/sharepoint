@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Linq;
+using System.Xml.Linq;
 using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
@@ -11,6 +12,26 @@ namespace SPCore.Caml.Operators
             : base(operatorName)
         {
             FieldRef = fieldRef;
+        }
+
+        protected SingleFieldOperator(string operatorName, string existingSingleFieldOperator)
+            : base(operatorName, existingSingleFieldOperator)
+        {
+        }
+
+        protected SingleFieldOperator(string operatorName, XElement existingSingleFieldOperator)
+            : base(operatorName, existingSingleFieldOperator)
+        {
+        }
+
+        protected override void OnParsing(XElement existingSingleFieldValueOperator)
+        {
+            XElement existingFieldRef = existingSingleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "FieldRef");
+
+            if (existingFieldRef != null)
+            {
+                FieldRef = new FieldRef(existingFieldRef);
+            }
         }
 
         public override XElement ToXElement()

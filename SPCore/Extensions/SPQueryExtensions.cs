@@ -2,6 +2,7 @@
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
+using SPCore.Caml;
 
 namespace SPCore
 {
@@ -9,7 +10,7 @@ namespace SPCore
     {
         public static readonly string EmptyCamlQuery = "0";
 
-        public static SPQuery GetView(this SPQuery spQuery, SPViewScope viewScope, bool hideUnapproved = false)
+        public static SPQuery WithViewScope(this SPQuery spQuery, SPViewScope viewScope, bool hideUnapproved = false)
         {
             switch (viewScope)
             {
@@ -26,6 +27,40 @@ namespace SPCore
                                                                  viewScope)
                                                  : string.Format("Scope=\"{0}\"", viewScope);
                     break;
+            }
+
+            return spQuery;
+        }
+
+        public static SPQuery WithViewFields(this SPQuery spQuery, params string[] viewFields)
+        {
+            if (viewFields.Length > 0)
+            {
+                spQuery.ViewFieldsOnly = true;
+
+                StringBuilder sb = new StringBuilder();
+
+                foreach (string viewField in viewFields)
+                {
+                    sb.Append(new FieldRef() { Name = viewField }.ToString());
+                }
+
+                spQuery.ViewFields = sb.ToString();
+            }
+
+            return spQuery;
+        }
+
+        public static SPQuery WithQuery(this SPQuery spQuery, Query query, bool addToExisting = false)
+        {
+            if (addToExisting)
+            {
+                Query existingQuery = Query.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
+                spQuery.Query = Query.Combine(existingQuery, query).ToString(false);
+            }
+            else
+            {
+                spQuery.Query = query.ToString(false);
             }
 
             return spQuery;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Caml.Operators
@@ -12,6 +13,16 @@ namespace SPCore.Caml.Operators
 
         public Neq(string fieldName, T value, SPFieldType type)
             : base("Neq", fieldName, value, type)
+        {
+        }
+
+        public Neq(string existingNeqOperator)
+            : base("Neq", existingNeqOperator)
+        {
+        }
+
+        public Neq(XElement existingNeqOperator)
+            : base("Neq", existingNeqOperator)
         {
         }
     }

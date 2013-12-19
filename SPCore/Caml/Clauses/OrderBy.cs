@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace SPCore.Caml.Clauses
@@ -19,6 +20,11 @@ namespace SPCore.Caml.Clauses
         {
         }
 
+        public OrderBy(XElement existingOrderBy)
+            : base("OrderBy", existingOrderBy)
+        {
+        }
+
         public OrderBy(Guid fieldId)
             : this(fieldId, null)
         {
@@ -34,6 +40,12 @@ namespace SPCore.Caml.Clauses
             : base("OrderBy")
         {
             this.FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName, Ascending = ascending } };
+        }
+
+        protected override void OnParsing(XElement existingOrderBy)
+        {
+            var existingFieldRefs = existingOrderBy.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
         }
 
         public override XElement ToXElement()
