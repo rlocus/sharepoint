@@ -124,7 +124,7 @@ namespace SPCore.Caml
         {
             Query query = new Query();
 
-            if (existingQuery != null && (existingQuery.HasElements && existingQuery.Name.LocalName == QueryTag))
+            if (existingQuery != null && (existingQuery.HasElements && string.Equals(existingQuery.Name.LocalName == QueryTag, StringComparison.InvariantCultureIgnoreCase)))
             {
                 XElement existingWhere = existingQuery.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "Where", StringComparison.InvariantCultureIgnoreCase));
 
