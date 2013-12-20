@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
 using SPCore.Caml.Clauses;
-using SPCore.Caml.Interfaces;
-using SPCore.Caml.Operators;
 
 namespace SPCore.Caml
 {
@@ -128,12 +126,17 @@ namespace SPCore.Caml
 
             if (existingQuery != null && (existingQuery.HasElements && existingQuery.Name.LocalName == QueryTag))
             {
-                XElement existingWhere = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "Where");
-                query.Where = new Where(existingWhere);
-                XElement existingOrderBy = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "OrderBy");
-                query.OrderBy = new OrderBy(existingOrderBy);
-                XElement existingGroupBy = existingQuery.Elements().SingleOrDefault(el => el.Name.LocalName == "GroupBy");
-                query.GroupBy = new GroupBy(existingGroupBy);
+                XElement existingWhere = existingQuery.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "Where", StringComparison.InvariantCultureIgnoreCase));
+
+                if (existingWhere != null) query.Where = new Where(existingWhere);
+
+                XElement existingOrderBy = existingQuery.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "OrderBy", StringComparison.InvariantCultureIgnoreCase));
+
+                if (existingOrderBy != null) query.OrderBy = new OrderBy(existingOrderBy);
+
+                XElement existingGroupBy = existingQuery.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "GroupBy", StringComparison.InvariantCultureIgnoreCase));
+
+                if (existingGroupBy != null) query.GroupBy = new GroupBy(existingGroupBy);
             }
 
             return query;
@@ -141,11 +144,12 @@ namespace SPCore.Caml
 
         public static Query Combine(Query firstQuery, Query secondQuery)
         {
-            Query newQuery = new Query();
-            newQuery.Where = Where.Combine(firstQuery.Where, secondQuery.Where);
-            newQuery.OrderBy = OrderBy.Combine(firstQuery.OrderBy, secondQuery.OrderBy);
-            newQuery.GroupBy = GroupBy.Combine(firstQuery.GroupBy, secondQuery.GroupBy);
-            return newQuery;
+            return new Query
+                       {
+                           Where = Where.Combine(firstQuery.Where, secondQuery.Where),
+                           OrderBy = OrderBy.Combine(firstQuery.OrderBy, secondQuery.OrderBy),
+                           GroupBy = GroupBy.Combine(firstQuery.GroupBy, secondQuery.GroupBy)
+                       };
         }
     }
 }

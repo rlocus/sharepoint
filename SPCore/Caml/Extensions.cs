@@ -12,14 +12,22 @@ namespace SPCore.Caml
         public static Where CombineAnd<T>(this Where where, T op)
            where T : Operator, IFieldOperator
         {
-            where.And(op);
+            if (where != null)
+            {
+                where.And(op);
+            }
+
             return where;
         }
 
         public static Where CombineOr<T>(this Where where, T op)
            where T : Operator, IFieldOperator
         {
-            where.Or(op);
+            if (where != null)
+            {
+                where.Or(op);
+            }
+
             return where;
         }
 

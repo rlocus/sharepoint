@@ -42,8 +42,11 @@ namespace SPCore.Caml
 
         private void Parse(string existingElement)
         {
-            XElement el = XElement.Parse(existingElement, LoadOptions.None);
-            Parse(el);
+            if (!string.IsNullOrEmpty(existingElement))
+            {
+                XElement el = XElement.Parse(existingElement, LoadOptions.None);
+                Parse(el);
+            }
         }
     }
 }
