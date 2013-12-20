@@ -260,5 +260,40 @@ namespace SPCore.Taxonomy
             return termValues;
         }
 
+        public static void ConnectTaxonomyField(SPSite site, TaxonomyField field, string termGroup, string termSetName)
+        {
+            if (site == null) { return; }
+
+            TaxonomySession session = new TaxonomySession(site);
+            ConnectTaxonomyField(session, field, termGroup, termSetName);
+        }
+
+        public static void ConnectTaxonomyField(TaxonomySession session, TaxonomyField field, string termGroup, string termSetName)
+        {
+            if (session == null || field == null) { return; }
+
+            if (session.DefaultKeywordsTermStore != null)
+            {
+                // get the default metadata service application
+                TermStore termStore = session.DefaultKeywordsTermStore;
+                Group group = termStore.Groups.GetByName(termGroup);
+               
+                if (group != null)
+                {
+                    TermSet termSet = group.TermSets.GetByName(termSetName);
+                    // connect the field to the specified term
+                    if (termSet != null)
+                    {
+                        field.SspId = termSet.TermStore.Id;
+                        field.TermSetId = termSet.Id;
+                    }
+                }
+
+                field.TargetTemplate = string.Empty;
+                field.AnchorId = Guid.Empty;
+                field.Update();
+            }
+        }
+
     }
 }
