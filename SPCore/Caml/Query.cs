@@ -118,7 +118,7 @@ namespace SPCore.Caml
                 return null;
             }
 
-            XElement el = XElement.Parse(existingQuery, LoadOptions.PreserveWhitespace);
+            XElement el = XElement.Parse(existingQuery, LoadOptions.None);
             return Parse(el);
         }
 
@@ -143,6 +143,8 @@ namespace SPCore.Caml
         {
             Query newQuery = new Query();
             newQuery.Where = Where.Combine(firstQuery.Where, secondQuery.Where);
+            newQuery.OrderBy = OrderBy.Combine(firstQuery.OrderBy, secondQuery.OrderBy);
+            newQuery.GroupBy = GroupBy.Combine(firstQuery.GroupBy, secondQuery.GroupBy);
             return newQuery;
         }
     }

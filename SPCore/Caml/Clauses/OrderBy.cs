@@ -33,18 +33,18 @@ namespace SPCore.Caml.Clauses
         public OrderBy(Guid fieldId, bool? ascending)
             : base("OrderBy")
         {
-            this.FieldRefs = new FieldRef[] { new FieldRef() { FieldId = fieldId, Ascending = ascending } };
+            this.FieldRefs = (new FieldRef[] { new FieldRef() { FieldId = fieldId, Ascending = ascending } }).AsEnumerable();
         }
 
         public OrderBy(string fieldName, bool? ascending)
             : base("OrderBy")
         {
-            this.FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName, Ascending = ascending } };
+            this.FieldRefs = (new FieldRef[] { new FieldRef() { Name = fieldName, Ascending = ascending } }).AsEnumerable();
         }
 
         protected override void OnParsing(XElement existingOrderBy)
         {
-            var existingFieldRefs = existingOrderBy.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            var existingFieldRefs = existingOrderBy.Elements().Where(el => string.Equals(el.Name.LocalName, "FieldRef", StringComparison.InvariantCultureIgnoreCase));
             FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
         }
 
@@ -61,6 +61,29 @@ namespace SPCore.Caml.Clauses
             }
 
             return el;
+        }
+
+        public static OrderBy Combine(OrderBy firstOrderBy, OrderBy secondOrderBy)
+        {
+            OrderBy orderBy = null;
+            var fieldRefs = new List<FieldRef>();
+
+            if (firstOrderBy != null && firstOrderBy.FieldRefs != null)
+            {
+                fieldRefs.AddRange(firstOrderBy.FieldRefs);
+            }
+
+            if (secondOrderBy != null && secondOrderBy.FieldRefs != null)
+            {
+                fieldRefs.AddRange(secondOrderBy.FieldRefs);
+            }
+
+            if (fieldRefs.Count > 0)
+            {
+                orderBy = new OrderBy(fieldRefs);
+            }
+
+            return orderBy;
         }
     }
 }

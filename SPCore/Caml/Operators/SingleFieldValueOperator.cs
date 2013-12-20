@@ -10,10 +10,34 @@ namespace SPCore.Caml.Operators
     {
         public FieldRef FieldRef { get; set; }
 
+        protected SingleFieldValueOperator(string operatorName, FieldRef fieldRef, Value<T> value)
+            : base(operatorName, value)
+        {
+            FieldRef = fieldRef;
+        }
+
+        protected SingleFieldValueOperator(string operatorName, FieldRef fieldRef, T value, SPFieldType type)
+            : base(operatorName, value, type)
+        {
+            FieldRef = fieldRef;
+        }
+
+        protected SingleFieldValueOperator(string operatorName, Guid fieldId, Value<T> value)
+            : base(operatorName, value)
+        {
+            FieldRef = new FieldRef() { FieldId = fieldId };
+        }
+
         protected SingleFieldValueOperator(string operatorName, Guid fieldId, T value, SPFieldType type)
             : base(operatorName, value, type)
         {
             FieldRef = new FieldRef() { FieldId = fieldId };
+        }
+
+        protected SingleFieldValueOperator(string operatorName, string fieldName, Value<T> value)
+            : base(operatorName, value)
+        {
+            FieldRef = new FieldRef() { Name = fieldName };
         }
 
         protected SingleFieldValueOperator(string operatorName, string fieldName, T value, SPFieldType type)
@@ -34,7 +58,7 @@ namespace SPCore.Caml.Operators
 
         protected override void OnParsing(XElement existingSingleFieldValueOperator)
         {
-            XElement existingFieldRef = existingSingleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "FieldRef");
+            XElement existingFieldRef = existingSingleFieldValueOperator.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "FieldRef", StringComparison.InvariantCultureIgnoreCase));
 
             if (existingFieldRef != null)
             {

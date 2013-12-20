@@ -55,7 +55,7 @@ namespace SPCore.Caml.Operators
         {
             base.OnParsing(existingMultipleFieldValueOperator);
 
-            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "Value");
+            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "Value", StringComparison.InvariantCultureIgnoreCase));
 
             if (existingValue != null && existingValue.HasElements)
             {

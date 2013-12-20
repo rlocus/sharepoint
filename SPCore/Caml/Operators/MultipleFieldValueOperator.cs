@@ -11,6 +11,12 @@ namespace SPCore.Caml.Operators
     {
         public IEnumerable<FieldRef> FieldRefs { get; set; }
 
+        protected MultipleFieldValueOperator(string operatorName, IEnumerable<FieldRef> fieldRefs, T value, SPFieldType type)
+            : base(operatorName, value, type)
+        {
+            FieldRefs = fieldRefs;
+        }
+
         protected MultipleFieldValueOperator(string operatorName, IEnumerable<string> fieldNames, T value, SPFieldType type)
             : base(operatorName, value, type)
         {
@@ -37,9 +43,9 @@ namespace SPCore.Caml.Operators
 
         protected override void OnParsing(XElement existingMultipleFieldValueOperator)
         {
-            var existingFieldRefs = existingMultipleFieldValueOperator.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            var existingFieldRefs = existingMultipleFieldValueOperator.Elements().Where(el => string.Equals(el.Name.LocalName, "FieldRef", StringComparison.InvariantCultureIgnoreCase));
             FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
-            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "Value");
+            XElement existingValue = existingMultipleFieldValueOperator.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "Value", StringComparison.InvariantCultureIgnoreCase));
 
             if (existingValue != null)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace SPCore.Caml.Operators
@@ -37,14 +38,14 @@ namespace SPCore.Caml.Operators
                 }
             }
 
-            this.Operators = operators;
+            this.Operators = operators.AsEnumerable();
         }
 
         public override XElement ToXElement()
         {
             XElement el = base.ToXElement();
 
-            foreach (Operator op in Operators)
+            foreach (Operator op in Operators.Where(op => op != null))
             {
                 el.Add(op.ToXElement());
             }

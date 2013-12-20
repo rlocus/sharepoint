@@ -76,26 +76,45 @@ namespace SPCore.Caml.Clauses
 
             if (secondWhere != null && firstWhere != null)
             {
-                if (secondWhere.Operators.First() is NestedOperator)
+                if (secondWhere.Operators.FirstOrDefault() is NestedOperator)
                 {
-                    var nestedOperator = secondWhere.Operators.First() as NestedOperator;
-                    var firstOperator = nestedOperator.Operators.FirstOrDefault(op => op is IFieldOperator);
-                    var secondOperator = nestedOperator.Operators.FirstOrDefault(op => !op.Equals(firstOperator));
-                    nestedOperator.Operators = new List<Operator>(firstWhere.Operators) { firstOperator };
-                    where = new Where(new And(nestedOperator, secondOperator));
+                    var nestedOperator = secondWhere.Operators.FirstOrDefault() as NestedOperator;
+
+                    if (nestedOperator != null && nestedOperator.Operators != null)
+                    {
+                        var firstOperator = nestedOperator.Operators.FirstOrDefault(op => op is IFieldOperator);
+                        var secondOperator = nestedOperator.Operators.FirstOrDefault(op => !op.Equals(firstOperator));
+                        var operators = new List<Operator>();
+
+                        if (firstWhere.Operators != null)
+                        {
+                            operators.Add(firstWhere.Operators.FirstOrDefault());
+                        }
+
+                        operators.Add(firstOperator);
+                        nestedOperator.Operators = operators;
+                        where = new Where(new And(nestedOperator, secondOperator));
+                    }
+                    else
+                    {
+                        if (firstWhere.Operators != null) where = new Where(firstWhere.Operators.FirstOrDefault());
+                    }
                 }
-                else if (secondWhere.Operators.First() is IFieldOperator)
+                else if (secondWhere.Operators != null && secondWhere.Operators.FirstOrDefault() is IFieldOperator)
                 {
-                    where = new Where(new And(firstWhere.Operators.First(), secondWhere.Operators.First()));
+                    where = new Where(new And(firstWhere.Operators.FirstOrDefault(), secondWhere.Operators.FirstOrDefault()));
                 }
             }
             else if (secondWhere == null && firstWhere != null)
             {
-                where = new Where(firstWhere.Operators.First());
+                if (firstWhere.Operators != null)
+                {
+                    where = new Where(firstWhere.Operators.FirstOrDefault());
+                }
             }
-            else if (secondWhere != null)
+            else if (secondWhere != null && secondWhere.Operators != null)
             {
-                where = new Where(secondWhere.Operators.First());
+                where = new Where(secondWhere.Operators.FirstOrDefault());
             }
 
             return where;

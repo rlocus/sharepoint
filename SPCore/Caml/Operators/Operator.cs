@@ -50,6 +50,8 @@ namespace SPCore.Caml.Operators
                     return new IsNotNull(existingOperator);
                 case "DateRangesOverlap":
                     return new DateRangesOverlap(existingOperator);
+                case "In":
+                    return new In<object>(existingOperator);
                 default:
                     return null;
             }

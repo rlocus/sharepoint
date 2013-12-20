@@ -113,12 +113,17 @@
     <Compile Include="Caml\Clauses\Where.cs" />
     <Compile Include="Caml\Extensions.cs" />
     <Compile Include="Caml\FieldRef.cs" />
+    <Compile Include="Caml\Interfaces\IMultipleValueOperator.cs" />
     <Compile Include="Caml\Interfaces\IFieldOperator.cs" />
     <Compile Include="Caml\Interfaces\IMultiFieldOperator.cs" />
     <Compile Include="Caml\Interfaces\ISingleFieldOperator.cs" />
+    <Compile Include="Caml\Interfaces\IValueOperator.cs" />
     <Compile Include="Caml\Operators\And.cs" />
     <Compile Include="Caml\Operators\BeginsWith.cs" />
     <Compile Include="Caml\Operators\Contains.cs" />
+    <Compile Include="Caml\Operators\In.cs" />
+    <Compile Include="Caml\Operators\MultipleValueOperator.cs" />
+    <Compile Include="Caml\Operators\SingleFieldMultipleValueOperator.cs" />
     <Compile Include="Caml\Operators\DateRangesOverlap.cs" />
     <Compile Include="Caml\Operators\Eq.cs" />
     <Compile Include="Caml\Operators\Geq.cs" />

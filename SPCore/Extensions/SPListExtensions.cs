@@ -6,6 +6,8 @@ using Microsoft.Office.Server.Utilities;
 using Microsoft.SharePoint;
 using Microsoft.SharePoint.Utilities;
 using Microsoft.SharePoint.Workflow;
+using SPCore.Caml;
+using SPCore.Caml.Clauses;
 using SPCore.Helper;
 
 namespace SPCore
@@ -340,20 +342,20 @@ namespace SPCore
         {
             string conditionQuery =
                 string.Format(
-                    "<BeginsWith><FieldRef Name=\"ContentTypeId\" /><Value Type=\"ContentTypeId\">{0}</Value></BeginsWith>",
+                    "<Where><BeginsWith><FieldRef Name=\"ContentTypeId\" /><Value Type=\"ContentTypeId\">{0}</Value></BeginsWith></Where>",
                     contentType.Id);
+
+            Where where = new Where(conditionQuery);
 
             if (query == null)
             {
-                query = new SPQuery
-                            {
-                                Query = string.Format("<Where>{0}</Where>", conditionQuery)
-                            };
-                query = query.WithViewScope(SPViewScope.Recursive);
+                query = new Query() { Where = where }.ToSPQuery().WithViewScope(SPViewScope.Recursive);
             }
             else
             {
-                query = query.AddWhereCondition(conditionQuery);
+                Query q = query.GetQueryObject();
+                q.Where = q.Where != null ? Where.Combine(q.Where, where) : where;
+                query.Query = q.ToString(false);
             }
 
             SPListItemCollection items = list.GetItems(query);

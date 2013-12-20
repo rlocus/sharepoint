@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System;
+using System.Xml.Linq;
 
 namespace SPCore.Caml
 {
@@ -32,7 +33,8 @@ namespace SPCore.Caml
 
         private void Parse(XElement existingElement)
         {
-            if (existingElement.Name.LocalName == ElementName && (existingElement.HasAttributes || existingElement.HasElements))
+            if (string.Equals(existingElement.Name.LocalName, ElementName, StringComparison.InvariantCultureIgnoreCase)
+                && (existingElement.HasAttributes || existingElement.HasElements))
             {
                 OnParsing(existingElement);
             }
@@ -40,7 +42,7 @@ namespace SPCore.Caml
 
         private void Parse(string existingElement)
         {
-            XElement el = XElement.Parse(existingElement, LoadOptions.PreserveWhitespace);
+            XElement el = XElement.Parse(existingElement, LoadOptions.None);
             Parse(el);
         }
     }

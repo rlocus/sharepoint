@@ -1,11 +1,18 @@
 ﻿using System.Xml.Linq;
 using Microsoft.SharePoint;
+using SPCore.Caml.Interfaces;
 
 namespace SPCore.Caml.Operators
 {
-    public abstract class ValueOperator<T> : Operator
+    public abstract class ValueOperator<T> : Operator, IValueOperator<T>
     {
         public Value<T> Value { get; set; }
+
+        protected ValueOperator(string operatorName, Value<T> value)
+            : base(operatorName)
+        {
+            Value = value;
+        }
 
         protected ValueOperator(string operatorName, T value, SPFieldType type)
             : base(operatorName)

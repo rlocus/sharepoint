@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using SPCore.Caml.Interfaces;
 
@@ -26,7 +27,7 @@ namespace SPCore.Caml.Operators
 
         protected override void OnParsing(XElement existingSingleFieldValueOperator)
         {
-            XElement existingFieldRef = existingSingleFieldValueOperator.Elements().SingleOrDefault(el => el.Name.LocalName == "FieldRef");
+            XElement existingFieldRef = existingSingleFieldValueOperator.Elements().SingleOrDefault(el => string.Equals(el.Name.LocalName, "FieldRef", StringComparison.InvariantCultureIgnoreCase));
 
             if (existingFieldRef != null)
             {
@@ -37,7 +38,7 @@ namespace SPCore.Caml.Operators
         public override XElement ToXElement()
         {
             XElement el = base.ToXElement();
-            el.Add(FieldRef.ToXElement());
+            el.AddFirst(FieldRef.ToXElement());
             return el;
         }
     }

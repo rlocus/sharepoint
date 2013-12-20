@@ -12,7 +12,7 @@ namespace SPCore.Caml.Clauses
         protected Clause(string clauseName, params Operator[] operators)
             : base(clauseName)
         {
-            Operators = operators;
+            if (operators != null) Operators = operators.AsEnumerable();
         }
 
         protected Clause(string clauseName, string existingClause)

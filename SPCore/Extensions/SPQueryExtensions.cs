@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Text;
 using Microsoft.SharePoint;
 using SPCore.Caml;
 
@@ -53,77 +51,90 @@ namespace SPCore
 
         public static SPQuery WithQuery(this SPQuery spQuery, Query query, bool addToExisting = false)
         {
-            if (addToExisting)
+            if (spQuery != null)
             {
-                Query existingQuery = Query.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
-                spQuery.Query = Query.Combine(existingQuery, query).ToString(false);
-            }
-            else
-            {
-                spQuery.Query = query.ToString(false);
+                if (addToExisting)
+                {
+                    Query existingQuery = spQuery.GetQueryObject();
+                    spQuery.Query = Query.Combine(existingQuery, query).ToString(false);
+                }
+                else
+                {
+                    spQuery.Query = query.ToString(false);
+                }
             }
 
             return spQuery;
         }
 
-        public static SPQuery AddWhereCondition(this SPQuery spQuery, string conditionQuery)
+        public static Query GetQueryObject(this SPQuery spQuery)
         {
-            XElement query = null;
-            bool withoutQuery = false;
-
-            if (!string.IsNullOrEmpty(spQuery.Query))
+            if (spQuery != null)
             {
-                query = XElement.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
-                withoutQuery = true;
+                return Query.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
             }
 
-            XElement condition = XElement.Parse(conditionQuery);
-
-            if (query != null && !query.HasElements)
-            {
-                spQuery.Query = new XElement("Where", condition).ToString();
-            }
-            else
-            {
-                if (query != null)
-                {
-                    XElement where = query.DescendantsAndSelf("Where").FirstOrDefault();
-
-                    if (where != null)
-                    {
-                        XElement existingCondition = where.Elements().FirstOrDefault();
-                        condition = existingCondition == null
-                                        ? condition
-                                        : new XElement("And", condition, existingCondition);
-                        where.ReplaceAll(condition);
-                    }
-                    else
-                    {
-                        query.Add(new XElement("Where", condition));
-                    }
-                }
-                else
-                {
-                    query = new XElement("Where", condition);
-                }
-
-                if (withoutQuery)
-                {
-                    StringBuilder sb = new StringBuilder();
-
-                    foreach (XElement element in query.DescendantsAndSelf("Query").Elements())
-                    {
-                        sb.Append(element.ToString(SaveOptions.DisableFormatting));
-                    }
-
-                    spQuery.Query = sb.ToString();
-                }
-                else
-                {
-                    spQuery.Query = query.ToString();
-                }
-            }
-            return spQuery;
+            return null;
         }
+
+        //public static SPQuery AddWhereCondition(this SPQuery spQuery, string conditionQuery)
+        //{
+        //    XElement query = null;
+        //    bool withoutQuery = false;
+
+        //    if (!string.IsNullOrEmpty(spQuery.Query))
+        //    {
+        //        query = XElement.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
+        //        withoutQuery = true;
+        //    }
+
+        //    XElement condition = XElement.Parse(conditionQuery);
+
+        //    if (query != null && !query.HasElements)
+        //    {
+        //        spQuery.Query = new XElement("Where", condition).ToString();
+        //    }
+        //    else
+        //    {
+        //        if (query != null)
+        //        {
+        //            XElement where = query.DescendantsAndSelf("Where").FirstOrDefault();
+
+        //            if (where != null)
+        //            {
+        //                XElement existingCondition = where.Elements().FirstOrDefault();
+        //                condition = existingCondition == null
+        //                                ? condition
+        //                                : new XElement("And", condition, existingCondition);
+        //                where.ReplaceAll(condition);
+        //            }
+        //            else
+        //            {
+        //                query.Add(new XElement("Where", condition));
+        //            }
+        //        }
+        //        else
+        //        {
+        //            query = new XElement("Where", condition);
+        //        }
+
+        //        if (withoutQuery)
+        //        {
+        //            StringBuilder sb = new StringBuilder();
+
+        //            foreach (XElement element in query.DescendantsAndSelf("Query").Elements())
+        //            {
+        //                sb.Append(element.ToString(SaveOptions.DisableFormatting));
+        //            }
+
+        //            spQuery.Query = sb.ToString();
+        //        }
+        //        else
+        //        {
+        //            spQuery.Query = query.ToString();
+        //        }
+        //    }
+        //    return spQuery;
+        //}
     }
 }

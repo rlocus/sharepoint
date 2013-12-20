@@ -18,6 +18,11 @@ namespace SPCore.Caml
             Type = type;
         }
 
+        public Value(string existingValue)
+            : base("Value", existingValue)
+        {
+        }
+
         public Value(XElement existingValue)
             : base("Value", existingValue)
         {
@@ -39,12 +44,19 @@ namespace SPCore.Caml
                 IncludeTimeValue = Convert.ToBoolean(includeTimeValue.Value);
             }
 
-            // TODO: value type converter
-            try
+            if (!string.IsNullOrEmpty(existingValue.Value))
             {
-                Val = (T)((object)existingValue.Value);
+                if (SPFieldType.DateTime == this.Type)
+                {
+                    if (typeof(T) == typeof(DateTime) || typeof(T) == typeof(object))
+                        Val = (T)((object)SPUtility.CreateDateTimeFromISO8601DateTimeString(existingValue.Value));
+                }
+                else
+                {
+                    // TODO: value type converter
+                    Val = (T)((object)existingValue.Value);
+                }
             }
-            catch { }
         }
 
         public override XElement ToXElement()
@@ -59,7 +71,7 @@ namespace SPCore.Caml
 
             if (SPFieldType.DateTime == this.Type)
             {
-                el.Value = typeof(T) == typeof(DateTime)
+                el.Value = typeof(T) == typeof(DateTime) || typeof(T) == typeof(object)
                     ? SPUtility.CreateISO8601DateTimeFromSystemDateTime(Convert.ToDateTime(Val))
                     : Convert.ToString(Val);
             }

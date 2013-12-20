@@ -27,7 +27,7 @@ namespace SPCore.Caml.Clauses
         public GroupBy(string fieldName, bool collapse)
             : base("GroupBy")
         {
-            FieldRefs = new FieldRef[] { new FieldRef() { Name = fieldName } };
+            FieldRefs = (new FieldRef[] { new FieldRef() { Name = fieldName } }).AsEnumerable();
             Collapse = collapse;
         }
 
@@ -43,7 +43,7 @@ namespace SPCore.Caml.Clauses
 
         protected override void OnParsing(XElement existingGroupBy)
         {
-            var existingFieldRefs = existingGroupBy.Elements().Where(el => el.Name.LocalName == "FieldRef");
+            var existingFieldRefs = existingGroupBy.Elements().Where(el => string.Equals(el.Name.LocalName, "FieldRef", StringComparison.InvariantCultureIgnoreCase));
             FieldRefs = existingFieldRefs.Select(existingFieldRef => new FieldRef(existingFieldRef))/*.ToList()*/;
 
             XAttribute collaps = existingGroupBy.Attribute("Collapse");
@@ -68,6 +68,33 @@ namespace SPCore.Caml.Clauses
             }
 
             return el;
+        }
+
+        public static GroupBy Combine(GroupBy firstGroupBy, GroupBy secondGroupBy)
+        {
+            GroupBy groupBy = null;
+            bool collaps = false;
+
+            var fieldRefs = new List<FieldRef>();
+
+            if (firstGroupBy != null && firstGroupBy.FieldRefs != null)
+            {
+                collaps = firstGroupBy.Collapse;
+                fieldRefs.AddRange(firstGroupBy.FieldRefs);
+            }
+
+            if (secondGroupBy != null && secondGroupBy.FieldRefs != null)
+            {
+                collaps = collaps | secondGroupBy.Collapse;
+                fieldRefs.AddRange(secondGroupBy.FieldRefs);
+            }
+
+            if (fieldRefs.Count > 0)
+            {
+                groupBy = new GroupBy(fieldRefs, collaps);
+            }
+
+            return groupBy;
         }
     }
 }
