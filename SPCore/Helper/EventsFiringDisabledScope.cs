@@ -6,7 +6,7 @@ namespace SPCore.Helper
     /// <summary>
     /// Disables the event firing
     /// </summary>
-    internal class EventsFiringDisabledScope : SPEventReceiverBase, IDisposable
+    public sealed class EventsFiringDisabledScope : SPEventReceiverBase, IDisposable
     {
         readonly bool _previouslyEnabled;
 

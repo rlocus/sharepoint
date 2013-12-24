@@ -13,7 +13,7 @@ namespace SPCore.Taxonomy
                 throw new ArgumentException("Taxonomy group name cannot be empty", "name");
             }
 
-            return groupCollection.FirstOrDefault(group => group.Name == name);
+            return groupCollection.SingleOrDefault(group => string.Equals(group.Name, name));
         }
 
         public static Term GetByName(this TermCollection termSets, string name)
@@ -22,7 +22,7 @@ namespace SPCore.Taxonomy
             {
                 throw new ArgumentException("Term set name cannot be empty", "name");
             }
-            return termSets.FirstOrDefault(termSet => termSet.Name.Equals(name, StringComparison.InvariantCulture));
+            return termSets.SingleOrDefault(termSet => string.Equals(termSet.Name, name));
         }
 
         public static Term GetByName(this TermSetItem termSet, string name)
@@ -33,7 +33,7 @@ namespace SPCore.Taxonomy
             }
 
             Term term = termSet is TermSet
-                            ? (termSet as TermSet).GetTerms(name, true, StringMatchOption.ExactMatch, 1, false).FirstOrDefault()
+                            ? (termSet as TermSet).GetTerms(name, true, StringMatchOption.ExactMatch, 1, false).SingleOrDefault()
                             : termSet.Terms.GetByName(name);
             return term;
         }
@@ -44,7 +44,7 @@ namespace SPCore.Taxonomy
             {
                 throw new ArgumentException("Term set name cannot be empty", "name");
             }
-            return termSets.FirstOrDefault(termSet => termSet.Name == name);
+            return termSets.SingleOrDefault(termSet => string.Equals(termSet.Name, name));
         }
     }
 }

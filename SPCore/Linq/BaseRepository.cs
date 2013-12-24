@@ -1,7 +1,4 @@
-﻿using Microsoft.Office.Server.Utilities;
-using Microsoft.SharePoint;
-using Microsoft.SharePoint.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +7,9 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
+using Microsoft.Office.Server.Utilities;
+using Microsoft.SharePoint;
+using Microsoft.SharePoint.Linq;
 
 namespace SPCore.Linq
 {
@@ -33,7 +33,12 @@ namespace SPCore.Linq
 
         protected TContext Context { get; private set; }
 
-        protected EntityList<TEntity> List { get; private set; }
+        private EntityList<TEntity> _list;
+
+        protected EntityList<TEntity> List
+        {
+            get { return _list ?? (_list = GetList(Context, ListName)); }
+        }
 
         protected TextWriter Log { get { return Context.Log; } set { Context.Log = value; } }
 
@@ -66,18 +71,7 @@ namespace SPCore.Linq
 
             SPContext ctx = SPContext.Current;
             IsAnonymous = ctx != null && SPContext.Current.Web.CurrentUser == null;
-
-            if (crossSite)
-            {
-                HttpContext backupCtx = HttpContext.Current;
-                HttpContext.Current = null;
-                InitializeParameters();
-                HttpContext.Current = backupCtx;
-            }
-            else
-            {
-                InitializeParameters();
-            }
+            Context = CreateContext(crossSite);
         }
 
         #endregion
@@ -93,34 +87,8 @@ namespace SPCore.Linq
 
         #region [ Private Methods ]
 
-        private void InitializeParameters()
-        {
-            if (IsAnonymous)
-            {
-                RunAsAdmin(() =>
-                {
-                    Context =
-                        (TContext)Activator.CreateInstance(typeof(TContext),
-                        new object[] { WebUrl });
-                    Context.ObjectTrackingEnabled = !ReadOnly;
-                    List = GetList(Context, ListName);
-                });
-            }
-            else
-            {
-                Context =
-                    (TContext)Activator.CreateInstance(typeof(TContext),
-                    new object[] { WebUrl });
-
-                Context.ObjectTrackingEnabled = !ReadOnly;
-                List = GetList(Context, ListName);
-            }
-        }
-
         private TContext CreateContext()
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
-
             TContext context = null;
 
             if (IsAnonymous)
@@ -129,19 +97,17 @@ namespace SPCore.Linq
                 {
                     context =
                         (TContext)Activator.CreateInstance(typeof(TContext),
-                        new object[] { Context.Web });
+                        new object[] { WebUrl });
                     context.ObjectTrackingEnabled = !ReadOnly;
-                    GetList(context, ListName);
                 });
             }
             else
             {
                 context =
                     (TContext)Activator.CreateInstance(typeof(TContext),
-                    new object[] { Context.Web });
+                    new object[] { WebUrl });
 
                 context.ObjectTrackingEnabled = !ReadOnly;
-                GetList(context, ListName);
             }
 
             return context;
@@ -432,11 +398,9 @@ namespace SPCore.Linq
                 if (entity.EntityState == EntityState.Unchanged)
                     return;
 
-                EntityList<TEntity> list = GetList(ctx, ListName);
-
                 if (!IsAttached(ctx, entity, MetaData.List.Title))
                 {
-                    list.Attach(entity);
+                    GetList(Context, MetaData.List.Title).Attach(entity);
 
                     if (entity.Id.HasValue)
                     {
@@ -622,8 +586,15 @@ namespace SPCore.Linq
             {
                 HttpContext backupCtx = HttpContext.Current;
                 HttpContext.Current = null;
-                context = CreateContext();
-                HttpContext.Current = backupCtx;
+
+                try
+                {
+                    context = CreateContext();
+                }
+                finally
+                {
+                    HttpContext.Current = backupCtx;
+                }
             }
             else
             {

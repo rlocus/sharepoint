@@ -1,10 +1,8 @@
-﻿using Microsoft.SharePoint;
-using Microsoft.SharePoint.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Reflection;
-using System.Text;
+using Microsoft.SharePoint;
+using Microsoft.SharePoint.Linq;
 
 namespace SPCore.Linq
 {

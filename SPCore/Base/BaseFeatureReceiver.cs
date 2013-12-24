@@ -33,16 +33,8 @@ namespace SPCore.Base
         /// </value>
         protected SPFeatureReceiverProperties Properties { get; private set; }
 
-        /// <summary>
-        /// Occurs on feature activation.
-        /// </summary>
-        /// <param name="properties">
-        /// An <see cref="T:Microsoft.SharePoint.SPFeatureReceiverProperties"/> object that represents the properties of the event.
-        /// </param>
-        public override void FeatureActivated(SPFeatureReceiverProperties properties)
+        private void Init(SPFeatureReceiverProperties properties)
         {
-            base.FeatureActivated(properties);
-
             this.Properties = properties;
             this.Scope = properties.Definition.Scope;
 
@@ -73,6 +65,43 @@ namespace SPCore.Base
                     this.Farm = this.WebApplication.Farm;
                     break;
             }
+        }
+
+
+        /// <summary>
+        /// Occurs on feature activation.
+        /// </summary>
+        /// <param name="properties">
+        /// An <see cref="T:Microsoft.SharePoint.SPFeatureReceiverProperties"/> object that represents the properties of the event.
+        /// </param>
+        public override void FeatureActivated(SPFeatureReceiverProperties properties)
+        {
+            base.FeatureActivated(properties);
+            Init(properties);
+        }
+
+        public override void FeatureDeactivating(SPFeatureReceiverProperties properties)
+        {
+            base.FeatureDeactivating(properties);
+            Init(properties);
+        }
+
+        public override void FeatureInstalled(SPFeatureReceiverProperties properties)
+        {
+            base.FeatureInstalled(properties);
+            Init(properties);
+        }
+
+        public override void FeatureUninstalling(SPFeatureReceiverProperties properties)
+        {
+            base.FeatureUninstalling(properties);
+            Init(properties);
+        }
+
+        public override void FeatureUpgrading(SPFeatureReceiverProperties properties, string upgradeActionName, System.Collections.Generic.IDictionary<string, string> parameters)
+        {
+            base.FeatureUpgrading(properties, upgradeActionName, parameters);
+            Init(properties);
         }
     }
 }

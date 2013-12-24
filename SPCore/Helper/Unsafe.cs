@@ -10,7 +10,8 @@ namespace SPCore.Helper
     public sealed class Unsafe : IDisposable
     {
         private readonly bool _originalAllowUnsafeUpdates;
-        private readonly SPWeb _web = null;
+        private readonly SPWeb _web;
+        private readonly SPSite _site;
 
         /// <summary>
         /// Constructor where we store the original value of AllowUnsafeUpdates
@@ -18,9 +19,18 @@ namespace SPCore.Helper
         /// <param name="originalWeb">The WebSite to make unsafe updates</param>
         public Unsafe(SPWeb originalWeb)
         {
+            if (originalWeb == null) throw new ArgumentNullException("originalWeb");
             this._web = originalWeb;
             this._originalAllowUnsafeUpdates = originalWeb.AllowUnsafeUpdates;
             originalWeb.AllowUnsafeUpdates = true;
+        }
+
+        public Unsafe(SPSite originalSite)
+        {
+            if (originalSite == null) throw new ArgumentNullException("originalSite");
+            this._site = originalSite;
+            this._originalAllowUnsafeUpdates = originalSite.AllowUnsafeUpdates;
+            originalSite.AllowUnsafeUpdates = true;
         }
 
         /// <summary>
@@ -28,7 +38,15 @@ namespace SPCore.Helper
         /// </summary>
         public void Dispose()
         {
-            this._web.AllowUnsafeUpdates = this._originalAllowUnsafeUpdates;
+            if (_site != null)
+            {
+                this._site.AllowUnsafeUpdates = this._originalAllowUnsafeUpdates;
+            }
+
+            if (_web != null)
+            {
+                this._web.AllowUnsafeUpdates = this._originalAllowUnsafeUpdates;
+            }
         }
     }
 }

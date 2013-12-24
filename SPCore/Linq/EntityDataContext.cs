@@ -6,39 +6,54 @@ namespace SPCore.Linq
 {
     public class EntityDataContext : DataContext
     {
-        private readonly SPSite _site;
-        private readonly SPWeb _web;
+        private SPSite _site;
+        private SPWeb _web;
 
         public EntityDataContext(string requestUrl) :
             base(requestUrl)
         {
-            _site = new SPSite(this.Web, SPUserToken.SystemAccount);
-            _web = _site.OpenWeb();
+            if (SPContext.Current != null)
+            {
+                this._site = SPContext.Current.Site;
+                this._web = ((SPContext.Current.Web.Url == requestUrl) ? SPContext.Current.Web : this._site.OpenWeb(/*new Uri(requestUrl).PathAndQuery*/));
+            }
+            else
+            {
+                this._site = new SPSite(requestUrl);
+                this._web = this._site.OpenWeb(/*new Uri(requestUrl).PathAndQuery*/);
+            }
+
+            //_site = new SPSite(requestUrl, SPUserToken.SystemAccount);
+            //_web = _site.OpenWeb();
         }
 
         public override EntityList<T> GetList<T>(string listName)
         {
             SPList list = _web.GetListByName(listName);
-
-            return list != null ? base.GetList<T>(list.Title) : null;
+            return base.GetList<T>(list.Title);
         }
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
 
-            if (disposing)
+            if (!disposing) return;
+
+            if (_web != null)
             {
                 try
                 {
-                    if (_web != null)
-                    {
-                        _web.Dispose();
-                    }
-                    if (_site != null)
-                    {
-                        _site.Dispose();
-                    }
+                    _web.Dispose();
+                    _web = null;
+                }
+                catch { }
+            }
+            if (_site != null)
+            {
+                try
+                {
+                    _site.Dispose();
+                    _site = null;
                 }
                 catch { }
             }

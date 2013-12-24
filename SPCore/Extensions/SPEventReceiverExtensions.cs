@@ -6,30 +6,28 @@ namespace SPCore
 {
     public static class SPEventReceiverExtensions
     {
-        public static void Register(this SPEventReceiverDefinitionCollection collection, string name, Type receiverType, SPEventReceiverType actionsToHandle, int sequenceNumber = 11000)
+        public static void Register(this SPEventReceiverDefinitionCollection collection, string name, Type receiverType, SPEventReceiverType actionsToHandle, SPEventReceiverSynchronization synchronization = SPEventReceiverSynchronization.Synchronous, int sequenceNumber = 11000)
         {
-            SPEventReceiverDefinition receiverDefinition = collection
-                                                            .Cast<SPEventReceiverDefinition>()
-                                                            .FirstOrDefault(r => r.Name == name);
+            SPEventReceiverDefinition receiverDefinition = collection.Cast<SPEventReceiverDefinition>()
+                .SingleOrDefault(receiver => string.Equals(receiver.Name, name));
 
             if (receiverDefinition == null)
             {
-                SPEventReceiverDefinition eventReceiver = collection.Add();
-                eventReceiver.Name = name;
-                eventReceiver.Synchronization = SPEventReceiverSynchronization.Synchronous;
-                eventReceiver.Type = actionsToHandle;
-                eventReceiver.SequenceNumber = sequenceNumber;
-                eventReceiver.Assembly = receiverType.Assembly.ToString();
-                eventReceiver.Class = receiverType.FullName;
-
-                eventReceiver.Update();
+                receiverDefinition = collection.Add();
+                receiverDefinition.Name = name;
+                receiverDefinition.Synchronization = synchronization;
+                receiverDefinition.Type = actionsToHandle;
+                receiverDefinition.SequenceNumber = sequenceNumber;
+                receiverDefinition.Assembly = receiverType.Assembly.ToString();
+                receiverDefinition.Class = receiverType.FullName;
+                receiverDefinition.Update();
             }
         }
 
         public static void Delete(this SPEventReceiverDefinitionCollection collection, string name)
         {
-            SPEventReceiverDefinition receiverDefinition =
-                collection.Cast<SPEventReceiverDefinition>().SingleOrDefault(receiver => receiver.Name == name);
+            SPEventReceiverDefinition receiverDefinition = collection.Cast<SPEventReceiverDefinition>()
+                .SingleOrDefault(receiver => string.Equals(receiver.Name, name));
 
             if (receiverDefinition != null)
             {

@@ -87,28 +87,15 @@ namespace SPCore
         {
             SPList list = null;
 
-            if (SPHelper.IsGuid(strList))
+            if (!string.IsNullOrEmpty(strList))
             {
-                try
+                if (SPHelper.IsGuid(strList))
                 {
-                    list = SPUtility.GetSPListFromName(web, web.ID, strList, null, null);
+                    list = web.Lists[new Guid(strList)];
                 }
-                catch (SPException)
+                else
                 {
-                }
-            }
-            else
-            {
-                if (SPUrlUtility.IsUrlRelative(strList))
-                {
-                    try
-                    {
-                        list = SPUtility.GetSPListFromName(web, web.ID, null, strList, null);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        list = web.Lists.TryGetList(strList);
-                    }
+                    list = web.TryGetListByUrl(strList) ?? web.Lists[strList];
                 }
             }
 
@@ -665,7 +652,7 @@ namespace SPCore
             PublishingPage newPage = publishingWeb.AddPublishingPage(pageName, pageLayout);
             return newPage;
         }
-        
+
         /// <summary>
         /// Checks if the custom action is contained in the SPUserCustomActionCollection and if so, 
         /// returns the id in the customActionId parameter

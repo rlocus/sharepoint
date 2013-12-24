@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
 using SPCore.Helper;
 
 namespace SPCore.Extensions
 {
-    class SPFieldExtensions
-    {
-    }
+    //public static class SPFieldExtensions
+    //{
+    //}
 
     public static class SPFieldLookupExtensions
     {

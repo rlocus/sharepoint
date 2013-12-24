@@ -260,39 +260,66 @@ namespace SPCore.Taxonomy
             return termValues;
         }
 
-        public static void ConnectTaxonomyField(SPSite site, TaxonomyField field, string termGroup, string termSetName)
+        public static void ConnectTaxonomyField(TaxonomyField field, SPSite site, string termStoreName, string termGroup, string termSetName, bool isOpen = false, bool createValuesInEditForm = false)
         {
             if (site == null) { return; }
 
             TaxonomySession session = new TaxonomySession(site);
-            ConnectTaxonomyField(session, field, termGroup, termSetName);
+            ConnectTaxonomyField(field, session, termStoreName, termGroup, termSetName, isOpen, createValuesInEditForm);
         }
 
-        public static void ConnectTaxonomyField(TaxonomySession session, TaxonomyField field, string termGroup, string termSetName)
+        public static void ConnectTaxonomyField(TaxonomyField field, SPSite site, string termGroup, string termSetName, bool isOpen = false, bool createValuesInEditForm = false)
         {
-            if (session == null || field == null) { return; }
+            if (site == null) { return; }
 
-            if (session.DefaultKeywordsTermStore != null)
+            TaxonomySession session = new TaxonomySession(site);
+            ConnectTaxonomyField(field, session, termGroup, termSetName, isOpen, createValuesInEditForm);
+        }
+
+        public static void ConnectTaxonomyField(TaxonomyField field, TaxonomySession session, string termStoreName, string termGroup, string termSetName, bool isOpen = false, bool createValuesInEditForm = false)
+        {
+            TermStore termStore = session.TermStores.SingleOrDefault(ts => string.Equals(ts.Name, termStoreName));
+            ConnectTaxonomyField(field, session, termStore, termGroup, termSetName, isOpen, createValuesInEditForm);
+        }
+
+        public static void ConnectTaxonomyField(TaxonomyField field, TaxonomySession session, string termGroup, string termSetName, bool isOpen = false, bool createValuesInEditForm = false)
+        {
+            TermStore termStore;
+
+            if (field != null && field.SspId != default(Guid))
             {
-                // get the default metadata service application
-                TermStore termStore = session.DefaultKeywordsTermStore;
-                Group group = termStore.Groups.GetByName(termGroup);
-               
-                if (group != null)
-                {
-                    TermSet termSet = group.TermSets.GetByName(termSetName);
-                    // connect the field to the specified term
-                    if (termSet != null)
-                    {
-                        field.SspId = termSet.TermStore.Id;
-                        field.TermSetId = termSet.Id;
-                    }
-                }
-
-                field.TargetTemplate = string.Empty;
-                field.AnchorId = Guid.Empty;
-                field.Update();
+                termStore = session.TermStores.SingleOrDefault(ts => ts.Id == field.SspId) ?? session.DefaultKeywordsTermStore;
             }
+            else
+            {
+                termStore = session.DefaultKeywordsTermStore;
+            }
+
+            ConnectTaxonomyField(field, session, termStore, termGroup, termSetName, isOpen, createValuesInEditForm);
+        }
+
+        public static void ConnectTaxonomyField(TaxonomyField field, TaxonomySession session, TermStore termStore, string termGroup, string termSetName, bool isOpen = false, bool createValuesInEditForm = false)
+        {
+            if (field == null || session == null || termStore == null) { return; }
+
+            Group group = termStore.Groups.GetByName(termGroup);
+
+            if (group != null)
+            {
+                TermSet termSet = group.TermSets.GetByName(termSetName);
+                // connect the field to the specified term
+                if (termSet != null)
+                {
+                    field.SspId = termSet.TermStore.Id;
+                    field.TermSetId = termSet.Id;
+                    field.Open = isOpen && termSet.IsOpenForTermCreation;
+                    field.CreateValuesInEditForm = field.Open && createValuesInEditForm;
+                }
+            }
+
+            field.TargetTemplate = string.Empty;
+            field.AnchorId = Guid.Empty;
+            field.Update();
         }
 
     }
