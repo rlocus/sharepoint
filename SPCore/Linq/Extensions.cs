@@ -21,7 +21,7 @@ namespace SPCore.Linq
         public static TRepository GetRepository<TRepository, TEntity, TContext>(this SPList list, bool readOnly = true)
             where TRepository : BaseRepository<TEntity, TContext>
             where TEntity : EntityItem, new()
-            where TContext : DataContext
+            where TContext : EntityDataContext
         {
             bool crossSite = SPContext.Current != null && SPContext.Current.Site.ID != list.ParentWeb.Site.ID;
 

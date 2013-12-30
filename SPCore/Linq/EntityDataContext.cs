@@ -41,6 +41,11 @@ namespace SPCore.Linq
 
             if (_web != null)
             {
+                if (SPContext.Current != null && _web == SPContext.Current.Web)
+                {
+                    return;
+                }
+
                 try
                 {
                     _web.Dispose();
@@ -50,6 +55,11 @@ namespace SPCore.Linq
             }
             if (_site != null)
             {
+                if (SPContext.Current != null && _site == SPContext.Current.Site)
+                {
+                    return;
+                }
+
                 try
                 {
                     _site.Dispose();

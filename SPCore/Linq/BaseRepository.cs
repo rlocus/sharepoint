@@ -20,7 +20,7 @@ namespace SPCore.Linq
     /// <typeparam name="TContext"></typeparam>
     public abstract class BaseRepository<TEntity, TContext> : IDisposable
         where TEntity : EntityItem, new()
-        where TContext : DataContext
+        where TContext : EntityDataContext
     {
         #region [ Fields ]
         protected readonly string WebUrl;
@@ -613,7 +613,7 @@ namespace SPCore.Linq
         /// <returns>true - attached, false - is not attached</returns>
         static bool EntityExistsInContext<TContext, TEntity>(TContext context, TEntity entity, string listName)
             where TEntity : EntityItem, new()
-            where TContext : DataContext
+            where TContext : EntityDataContext
         {
             if (context == null) { throw new ArgumentException("Context"); }
 
@@ -622,7 +622,7 @@ namespace SPCore.Linq
             var val = pi.GetValue(context, null);
             Type trackerType = val.GetType();
             Type eidType =
-                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
+                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(EntityDataContext).Assembly.FullName);
             var eid = Activator.CreateInstance(eidType, context.Web, listName);
             MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
             var res = mi.Invoke(val, new[] { entity, eid });

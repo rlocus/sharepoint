@@ -22,7 +22,7 @@ namespace SPCore.Helper
             if (originalWeb == null) throw new ArgumentNullException("originalWeb");
             this._web = originalWeb;
             this._originalAllowUnsafeUpdates = originalWeb.AllowUnsafeUpdates;
-            originalWeb.AllowUnsafeUpdates = true;
+            this._web.AllowUnsafeUpdates = true;
         }
 
         public Unsafe(SPSite originalSite)
@@ -30,7 +30,7 @@ namespace SPCore.Helper
             if (originalSite == null) throw new ArgumentNullException("originalSite");
             this._site = originalSite;
             this._originalAllowUnsafeUpdates = originalSite.AllowUnsafeUpdates;
-            originalSite.AllowUnsafeUpdates = true;
+            this._site.AllowUnsafeUpdates = true;
         }
 
         /// <summary>

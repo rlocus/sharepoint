@@ -535,54 +535,50 @@ namespace SPCore.Helper
             }
         }
 
-        public static void RunAction(Action<SPWeb> action, SPSite site, ActionScope scope)
+        public static void RunAction(Action<SPWeb> action, SPSite site, ActionScope scope = ActionScope.Web)
+        {
+            if (site == null) throw new ArgumentNullException("site");
+
+            using (SPWeb web = site.OpenWeb())
+            {
+                RunAction(action, web, scope);
+            }
+        }
+
+        public static void RunAction(Action<SPWeb> action, SPWeb web, ActionScope scope = ActionScope.Web)
         {
             if (action == null) { return; }
+            if (web == null) throw new ArgumentNullException("web");
 
             switch (scope)
             {
                 case ActionScope.Web:
-                    using (SPWeb web = site.OpenWeb())
-                    {
-                        action(web);
-                    }
+                    action(web);
                     break;
                 case ActionScope.RootWeb:
-                    action(site.RootWeb);
+                    action(web.Site.RootWeb);
                     break;
                 case ActionScope.SubWebs:
-                    using (SPWeb web = site.OpenWeb())
-                    {
-                        web.Webs.AsSafeEnumerable().ForEach(action);
-                    }
+                    web.Webs.AsSafeEnumerable().ForEach(action);
                     break;
                 case ActionScope.SubWebsRecursion:
-                    using (SPWeb web = site.OpenWeb())
-                    {
-                        web.Webs.AsSafeEnumerable().RecursiveSelect(w => w.Webs.AsSafeEnumerable()).ForEach(action);
-                    }
+                    web.Webs.AsSafeEnumerable().RecursiveSelect(w => w.Webs.AsSafeEnumerable()).ForEach(action);
                     break;
                 case ActionScope.WebAndSubWebs:
-                    using (SPWeb web = site.OpenWeb())
-                    {
-                        action(web);
-                        web.Webs.AsSafeEnumerable().ForEach(action);
-                    }
+                    action(web);
+                    web.Webs.AsSafeEnumerable().ForEach(action);
                     break;
                 case ActionScope.WebAndSubWebsRecursion:
-                    using (SPWeb web = site.OpenWeb())
-                    {
-                        action(web);
-                        web.Webs.AsSafeEnumerable().RecursiveSelect(w => w.Webs.AsSafeEnumerable()).ForEach(action);
-                    }
+                    action(web);
+                    web.Webs.AsSafeEnumerable().RecursiveSelect(w => w.Webs.AsSafeEnumerable()).ForEach(action);
                     break;
                 case ActionScope.AllWebs:
-                    site.AllWebs.AsSafeEnumerable().ForEach(action);
+                    web.Site.AllWebs.AsSafeEnumerable().ForEach(action);
                     break;
             }
         }
 
-        public static void RunAction(Action<SPWeb> action, string url, ActionScope scope, SPUser user = null)
+        public static void RunAction(Action<SPWeb> action, string url, ActionScope scope = ActionScope.Web, SPUser user = null)
         {
             if (user == null)
             {
