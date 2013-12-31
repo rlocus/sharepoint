@@ -29,7 +29,7 @@ namespace SPCore.Linq
                         new object[] { list.Title, list.ParentWeb.Url, readOnly, crossSite });
         }
 
-        public static EntityListMetaData GetListMetaData<TEntity>(this EntityList<TEntity> entityList)
+        public static EntityListMetaData GetMetaData<TEntity>(this EntityList<TEntity> entityList)
             where TEntity : EntityItem, new()
         {
             return EntityListMetaData.GetMetaData(entityList);

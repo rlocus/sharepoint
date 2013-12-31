@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -41,18 +42,21 @@ namespace SPCore.Linq
             get { return _list ?? (_list = GetList(Context, ListName)); }
         }
 
-        private EntityListMetaData _listMetaData;
+        private EntityListMetaData _metaData;
 
-        protected EntityListMetaData ListMetaData
+        /// <summary>
+        /// EntityList meta data
+        /// </summary>
+        protected EntityListMetaData MetaData
         {
             get
             {
-                if (List != null)
+                if (List == null)
                 {
-                    return _listMetaData ?? (_listMetaData = List.GetListMetaData());
+                    throw new ArgumentNullException("List");
                 }
 
-                return null;
+                return _metaData ?? (_metaData = List.GetMetaData());
             }
         }
 
@@ -178,7 +182,7 @@ namespace SPCore.Linq
         protected void DeleteEntityVersion(int entityId, int versionId)
         {
             SPListItem item = MetaData.List.GetItemById(entityId);
-            SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString());
+            SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString(CultureInfo.InvariantCulture));
             version.Delete();
         }
 
@@ -282,7 +286,7 @@ namespace SPCore.Linq
         public IQueryable<TEntity> GetEntityCollection<TKey>(
            Expression<Func<TEntity, bool>> where, string path, bool recursive, Expression<Func<TEntity, TKey>> orderBy, bool descending, int maxRows)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             IQueryable<TEntity> query = (where == null)
                                             ? List.ScopeToFolder(path, recursive)
@@ -304,7 +308,7 @@ namespace SPCore.Linq
         /// <param name="id">Id</param>
         public TEntity GetEntity(int id)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             return List
                 .ScopeToFolder(string.Empty, true)
@@ -313,7 +317,7 @@ namespace SPCore.Linq
 
         public TEntity GetEntity(Expression<Func<TEntity, bool>> where, string path = "", bool recursive = true)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             return List
                 .ScopeToFolder(path, recursive)
@@ -326,7 +330,7 @@ namespace SPCore.Linq
         /// <param name="entity">entity</param>
         public void DeleteEntity(TEntity entity)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             if (!entity.Id.HasValue)
                 throw new ArgumentException("Entity has no identifier.");
@@ -346,7 +350,7 @@ namespace SPCore.Linq
 
         public void DeleteEntity(int id)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             IQueryable<TEntity> query = List
                 .ScopeToFolder(string.Empty, true)
@@ -362,14 +366,14 @@ namespace SPCore.Linq
 
         public void DeleteEntityCollection(IEnumerable<TEntity> entities)
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             List.DeleteAllOnSubmit(entities);
         }
 
         public void DeleteAll()
         {
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             IQueryable<TEntity> entities = GetEntityCollection(entry => true);
             DeleteEntityCollection(entities);
@@ -389,7 +393,7 @@ namespace SPCore.Linq
                 return;
             }
 
-            if (Context == null) { throw new ArgumentException("Context"); }
+            //if (Context == null) { throw new ArgumentException("Context"); }
 
             if (!entity.Id.HasValue)
                 entity.EntityState = EntityState.ToBeInserted;
@@ -397,7 +401,7 @@ namespace SPCore.Linq
             if (entity.EntityState == EntityState.Unchanged)
                 return;
 
-            if (!IsAttached(Context, entity, ListMetaData.Name))
+            if (!IsAttached(Context, entity, MetaData.Name))
             {
                 List.Attach(entity);
 
@@ -418,15 +422,12 @@ namespace SPCore.Linq
                 if (entity.EntityState == EntityState.Unchanged)
                     return;
 
-                //if (!IsAttached(ctx, entity, ListMetaData.Name))
-                //{
                 GetList(ctx, ListName).Attach(entity);
 
                 if (entity.Id.HasValue)
                 {
                     ctx.Refresh(RefreshMode.KeepCurrentValues, entity);
                 }
-                //}
 
                 Commit(ctx, ConflictMode.FailOnFirstConflict, false);
             }
@@ -501,19 +502,6 @@ namespace SPCore.Linq
 
             EntityLockInfo info = new EntityLockInfo(file);
             return info;
-        }
-
-        /// <summary>
-        /// EntityList meta data
-        /// </summary>
-        public EntityListMetaData MetaData
-        {
-            get
-            {
-                if (Context == null) { throw new ArgumentException("Context"); }
-
-                return EntityListMetaData.GetMetaData(List);
-            }
         }
 
         public void RunAsAdmin(SPSecurity.CodeToRunElevated secureCode)
@@ -638,7 +626,7 @@ namespace SPCore.Linq
         /// <returns>true - attached, false - is not attached</returns>
         static bool EntityExistsInContext(TContext context, TEntity entity, string listName)
         {
-            if (context == null) { throw new ArgumentException("Context"); }
+            //if (context == null) { throw new ArgumentException("Context"); }
 
             Type type = context.GetType();
             PropertyInfo pi = type.GetProperty("EntityTracker", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -654,11 +642,15 @@ namespace SPCore.Linq
 
         static bool IsAttached(TContext context, TEntity entity, string listName)
         {
+            if (context == null) throw new ArgumentNullException("context");
+
             return EntityExistsInContext(context, entity, listName);
         }
 
         static EntityList<TEntity> GetList(TContext context, string listName)
         {
+            if (context == null) throw new ArgumentNullException("context");
+
             return context.GetList<TEntity>(listName);
         }
 
