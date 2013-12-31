@@ -22,9 +22,6 @@ namespace SPCore.Linq
                 this._site = new SPSite(requestUrl);
                 this._web = this._site.OpenWeb(/*new Uri(requestUrl).PathAndQuery*/);
             }
-
-            //_site = new SPSite(requestUrl, SPUserToken.SystemAccount);
-            //_web = _site.OpenWeb();
         }
 
         public override EntityList<T> GetList<T>(string listName)
@@ -39,33 +36,23 @@ namespace SPCore.Linq
 
             if (!disposing) return;
 
-            if (_web != null)
+            if (_web != null && (SPContext.Current == null || _web != SPContext.Current.Web))
             {
-                if (SPContext.Current != null && _web == SPContext.Current.Web)
-                {
-                    return;
-                }
-
                 try
                 {
                     _web.Dispose();
-                    _web = null;
                 }
                 catch { }
+                _web = null;
             }
-            if (_site != null)
+            if (_site != null && (SPContext.Current == null || _site != SPContext.Current.Site))
             {
-                if (SPContext.Current != null && _site == SPContext.Current.Site)
-                {
-                    return;
-                }
-
                 try
                 {
                     _site.Dispose();
-                    _site = null;
                 }
                 catch { }
+                _site = null;
             }
         }
 

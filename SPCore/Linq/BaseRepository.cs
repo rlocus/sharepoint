@@ -26,6 +26,7 @@ namespace SPCore.Linq
         protected readonly string WebUrl;
         protected readonly string ListName;
         protected readonly bool ReadOnly;
+        protected readonly bool CrossSite;
         protected readonly bool IsAnonymous;
         #endregion
 
@@ -38,6 +39,21 @@ namespace SPCore.Linq
         protected EntityList<TEntity> List
         {
             get { return _list ?? (_list = GetList(Context, ListName)); }
+        }
+
+        private EntityListMetaData _listMetaData;
+
+        protected EntityListMetaData ListMetaData
+        {
+            get
+            {
+                if (List != null)
+                {
+                    return _listMetaData ?? (_listMetaData = List.GetListMetaData());
+                }
+
+                return null;
+            }
         }
 
         protected TextWriter Log { get { return Context.Log; } set { Context.Log = value; } }
@@ -65,7 +81,11 @@ namespace SPCore.Linq
 
         protected BaseRepository(string listName, string webUrl, bool readOnly, bool crossSite)
         {
+            if (listName == null) throw new ArgumentNullException("listName");
+            if (webUrl == null) throw new ArgumentNullException("webUrl");
+
             ReadOnly = readOnly;
+            CrossSite = crossSite;
             ListName = listName;
             WebUrl = webUrl;
 
@@ -87,7 +107,7 @@ namespace SPCore.Linq
 
         #region [ Private Methods ]
 
-        private TContext CreateContext()
+        private TContext GetContext()
         {
             TContext context = null;
 
@@ -377,7 +397,7 @@ namespace SPCore.Linq
             if (entity.EntityState == EntityState.Unchanged)
                 return;
 
-            if (!IsAttached(Context, entity, MetaData.List.Title))
+            if (!IsAttached(Context, entity, ListMetaData.Name))
             {
                 List.Attach(entity);
 
@@ -390,7 +410,7 @@ namespace SPCore.Linq
 
         private void SaveEntitySafely(TEntity entity)
         {
-            using (TContext ctx = CreateContext())
+            using (TContext ctx = CreateContext(CrossSite))
             {
                 if (!entity.Id.HasValue)
                     entity.EntityState = EntityState.ToBeInserted;
@@ -398,15 +418,15 @@ namespace SPCore.Linq
                 if (entity.EntityState == EntityState.Unchanged)
                     return;
 
-                if (!IsAttached(ctx, entity, MetaData.List.Title))
-                {
-                    GetList(Context, MetaData.List.Title).Attach(entity);
+                //if (!IsAttached(ctx, entity, ListMetaData.Name))
+                //{
+                GetList(ctx, ListName).Attach(entity);
 
-                    if (entity.Id.HasValue)
-                    {
-                        ctx.Refresh(RefreshMode.KeepCurrentValues, entity);
-                    }
+                if (entity.Id.HasValue)
+                {
+                    ctx.Refresh(RefreshMode.KeepCurrentValues, entity);
                 }
+                //}
 
                 Commit(ctx, ConflictMode.FailOnFirstConflict, false);
             }
@@ -578,7 +598,12 @@ namespace SPCore.Linq
             GC.SuppressFinalize(this);
         }
 
-        public TContext CreateContext(bool crossSite = false)
+        public TContext CreateContext()
+        {
+            return CreateContext(false);
+        }
+
+        public TContext CreateContext(bool crossSite)
         {
             TContext context;
 
@@ -589,7 +614,7 @@ namespace SPCore.Linq
 
                 try
                 {
-                    context = CreateContext();
+                    context = GetContext();
                 }
                 finally
                 {
@@ -598,7 +623,7 @@ namespace SPCore.Linq
             }
             else
             {
-                context = CreateContext();
+                context = GetContext();
             }
 
             return context;
@@ -611,9 +636,7 @@ namespace SPCore.Linq
         /// <param name="entity">entity</param>
         /// <param name="listName"></param>
         /// <returns>true - attached, false - is not attached</returns>
-        static bool EntityExistsInContext<TContext, TEntity>(TContext context, TEntity entity, string listName)
-            where TEntity : EntityItem, new()
-            where TContext : EntityDataContext
+        static bool EntityExistsInContext(TContext context, TEntity entity, string listName)
         {
             if (context == null) { throw new ArgumentException("Context"); }
 
@@ -622,7 +645,7 @@ namespace SPCore.Linq
             var val = pi.GetValue(context, null);
             Type trackerType = val.GetType();
             Type eidType =
-                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(EntityDataContext).Assembly.FullName);
+                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
             var eid = Activator.CreateInstance(eidType, context.Web, listName);
             MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
             var res = mi.Invoke(val, new[] { entity, eid });

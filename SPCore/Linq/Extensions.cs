@@ -28,5 +28,11 @@ namespace SPCore.Linq
             return (TRepository)Activator.CreateInstance(typeof(TRepository),
                         new object[] { list.Title, list.ParentWeb.Url, readOnly, crossSite });
         }
+
+        public static EntityListMetaData GetListMetaData<TEntity>(this EntityList<TEntity> entityList)
+            where TEntity : EntityItem, new()
+        {
+            return EntityListMetaData.GetMetaData(entityList);
+        }
     }
 }

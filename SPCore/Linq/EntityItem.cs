@@ -727,7 +727,7 @@ namespace SPCore.Linq
             SPListItem item = (SPListItem)listItem;
             SPList list = item.ParentList;
 
-            if (list.EnableAttachments)
+            if (list.EnableAttachments && (bool) item["Attachments"])
             {
                 Attachments = item.Attachments;
             }
