@@ -224,6 +224,7 @@
     <Compile Include="Formula\Elements\Text\Trim.cs" />
     <Compile Include="Formula\Elements\Text\Upper.cs" />
     <Compile Include="Formula\SPFormulaBuilder.cs" />
+    <Compile Include="Helper\SPConverter.cs" />
     <Compile Include="Taxonomy\TaxonomyExtensions.cs" />
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Helper\ActionScope.cs" />

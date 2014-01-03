@@ -48,5 +48,10 @@ namespace SPCore.Caml
                 Parse(el);
             }
         }
+
+        public override string ToString()
+        {
+            return ToXElement().ToString();
+        }
     }
 }

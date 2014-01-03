@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using Microsoft.SharePoint;
 using Microsoft.SharePoint.Utilities;
+using SPCore.Helper;
 
 namespace SPCore.Caml
 {
@@ -53,8 +54,8 @@ namespace SPCore.Caml
                 }
                 else
                 {
-                    // TODO: value type converter
-                    Val = (T)((object)existingValue.Value);
+                    //Val = (T)SPConverter.ConvertValue(SPConverter.GetValueType(Type), existingValue.Value);
+                    Val = SPConverter.ConvertValue<T>(existingValue.Value);
                 }
             }
         }

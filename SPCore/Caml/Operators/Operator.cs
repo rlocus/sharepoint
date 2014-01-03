@@ -22,35 +22,35 @@ namespace SPCore.Caml.Operators
 
         public static Operator GetOperator(XElement existingOperator)
         {
-            switch (existingOperator.Name.LocalName)
+            switch (existingOperator.Name.LocalName.ToUpper())
             {
-                case "And":
+                case "AND":
                     return new And(existingOperator);
-                case "Or":
+                case "OR":
                     return new Or(existingOperator);
-                case "BeginsWith":
+                case "BEGINSWITH":
                     return new BeginsWith(existingOperator);
-                case "Contains":
+                case "CONTAINS":
                     return new Contains(existingOperator);
-                case "Eq":
+                case "EQ":
                     return new Eq<object>(existingOperator);
-                case "Geq":
+                case "GEQ":
                     return new Geq<object>(existingOperator);
-                case "Gt":
+                case "GT":
                     return new Gt<object>(existingOperator);
-                case "Leq":
+                case "LEQ":
                     return new Leq<object>(existingOperator);
-                case "Lt":
+                case "LT":
                     return new Lt<object>(existingOperator);
-                case "Neq":
+                case "NEQ":
                     return new Neq<object>(existingOperator);
-                case "IsNull":
+                case "ISNULL":
                     return new IsNull(existingOperator);
-                case "IsNotNull":
+                case "ISNOTNULL":
                     return new IsNotNull(existingOperator);
-                case "DateRangesOverlap":
+                case "DATERANGESOVERLAP":
                     return new DateRangesOverlap(existingOperator);
-                case "In":
+                case "IN":
                     return new In<object>(existingOperator);
                 default:
                     return null;

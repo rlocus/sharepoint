@@ -16,6 +16,10 @@ namespace SPCore.Caml
             {
                 where.And(op);
             }
+            else
+            {
+                where = new Where(op);
+            }
 
             return where;
         }
@@ -26,6 +30,10 @@ namespace SPCore.Caml
             if (where != null)
             {
                 where.Or(op);
+            }
+            else
+            {
+                where = new Where(op);
             }
 
             return where;
