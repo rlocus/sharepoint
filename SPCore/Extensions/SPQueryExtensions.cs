@@ -8,7 +8,7 @@ namespace SPCore
     {
         public static readonly string EmptyCamlQuery = "0";
 
-        public static SPQuery WithViewScope(this SPQuery spQuery, SPViewScope viewScope, bool hideUnapproved = false)
+        public static SPQuery InScope(this SPQuery spQuery, SPViewScope viewScope, bool hideUnapproved = false)
         {
             switch (viewScope)
             {
@@ -30,7 +30,7 @@ namespace SPCore
             return spQuery;
         }
 
-        public static SPQuery WithViewFields(this SPQuery spQuery, params string[] viewFields)
+        public static SPQuery Include(this SPQuery spQuery, params string[] viewFields)
         {
             if (viewFields.Length > 0)
             {
@@ -40,7 +40,7 @@ namespace SPCore
 
                 foreach (string viewField in viewFields)
                 {
-                    sb.Append(new FieldRef() { Name = viewField }.ToString());
+                    sb.Append(new FieldRef() { Name = viewField });
                 }
 
                 spQuery.ViewFields = sb.ToString();
@@ -49,92 +49,15 @@ namespace SPCore
             return spQuery;
         }
 
-        public static SPQuery WithQuery(this SPQuery spQuery, Query query, bool addToExisting = false)
+        public static SPQuery Combine(this SPQuery spQuery, Query query)
         {
             if (spQuery != null)
             {
-                if (addToExisting)
-                {
-                    Query existingQuery = spQuery.GetQueryObject();
-                    spQuery.Query = Query.Combine(existingQuery, query).ToString(false);
-                }
-                else
-                {
-                    spQuery.Query = query.ToString(false);
-                }
+                Query existingQuery = Query.GetFromSPQuery(spQuery);
+                spQuery.Query = Query.Combine(existingQuery, query).ToString(false);
             }
 
             return spQuery;
         }
-
-        public static Query GetQueryObject(this SPQuery spQuery)
-        {
-            if (spQuery != null)
-            {
-                return Query.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
-            }
-
-            return null;
-        }
-
-        //public static SPQuery AddWhereCondition(this SPQuery spQuery, string conditionQuery)
-        //{
-        //    XElement query = null;
-        //    bool withoutQuery = false;
-
-        //    if (!string.IsNullOrEmpty(spQuery.Query))
-        //    {
-        //        query = XElement.Parse(string.Format("<Query>{0}</Query>", spQuery.Query));
-        //        withoutQuery = true;
-        //    }
-
-        //    XElement condition = XElement.Parse(conditionQuery);
-
-        //    if (query != null && !query.HasElements)
-        //    {
-        //        spQuery.Query = new XElement("Where", condition).ToString();
-        //    }
-        //    else
-        //    {
-        //        if (query != null)
-        //        {
-        //            XElement where = query.DescendantsAndSelf("Where").FirstOrDefault();
-
-        //            if (where != null)
-        //            {
-        //                XElement existingCondition = where.Elements().FirstOrDefault();
-        //                condition = existingCondition == null
-        //                                ? condition
-        //                                : new XElement("And", condition, existingCondition);
-        //                where.ReplaceAll(condition);
-        //            }
-        //            else
-        //            {
-        //                query.Add(new XElement("Where", condition));
-        //            }
-        //        }
-        //        else
-        //        {
-        //            query = new XElement("Where", condition);
-        //        }
-
-        //        if (withoutQuery)
-        //        {
-        //            StringBuilder sb = new StringBuilder();
-
-        //            foreach (XElement element in query.DescendantsAndSelf("Query").Elements())
-        //            {
-        //                sb.Append(element.ToString(SaveOptions.DisableFormatting));
-        //            }
-
-        //            spQuery.Query = sb.ToString();
-        //        }
-        //        else
-        //        {
-        //            spQuery.Query = query.ToString();
-        //        }
-        //    }
-        //    return spQuery;
-        //}
     }
 }

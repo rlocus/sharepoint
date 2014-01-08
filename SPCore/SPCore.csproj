@@ -107,6 +107,9 @@
     <Compile Include="Base\BaseVisualWebPartUserControl.cs" />
     <Compile Include="BusinessData\BaseEntity.cs" />
     <Compile Include="BusinessData\BaseRepository.cs" />
+    <Compile Include="Cache\ICachedObject.cs" />
+    <Compile Include="Cache\SPCache.cs" />
+    <Compile Include="Cache\SPListQueryCache.cs" />
     <Compile Include="Caml\Clauses\Clause.cs" />
     <Compile Include="Caml\Clauses\GroupBy.cs" />
     <Compile Include="Caml\Clauses\OrderBy.cs" />
@@ -231,7 +234,6 @@
     <Compile Include="Helper\BatchDataColumn.cs" />
     <Compile Include="Helper\BatchDataCommandType.cs" />
     <Compile Include="Helper\BatchDataMethod.cs" />
-    <Compile Include="Helper\CacheHelper.cs" />
     <Compile Include="Helper\EmailUtility.cs" />
     <Compile Include="Helper\EventsFiringDisabledScope.cs" />
     <Compile Include="Helper\OnErrorAction.cs" />
@@ -279,7 +281,6 @@
     <Compile Include="Upgrade\ISPUpgradeAction.cs" />
     <Compile Include="Upgrade\SPUpgradeAction.cs" />
     <Compile Include="Upgrade\SPUpgradeProcessor.cs" />
-    <Compile Include="Upgrade\SPUpgradeVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SPCore.snk" />

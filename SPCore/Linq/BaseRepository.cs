@@ -160,6 +160,46 @@ namespace SPCore.Linq
 
         #endregion
 
+        #region [ Helper Methods ]
+        /// <summary>
+        /// Check entity is attached to context
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="entity">entity</param>
+        /// <param name="listName"></param>
+        /// <returns>true - attached, false - is not attached</returns>
+        static bool EntityExistsInContext(TContext context, TEntity entity, string listName)
+        {
+            //if (context == null) { throw new ArgumentException("Context"); }
+
+            Type type = context.GetType();
+            PropertyInfo pi = type.GetProperty("EntityTracker", BindingFlags.NonPublic | BindingFlags.Instance);
+            var val = pi.GetValue(context, null);
+            Type trackerType = val.GetType();
+            Type eidType =
+                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
+            var eid = Activator.CreateInstance(eidType, context.Web, listName);
+            MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
+            var res = mi.Invoke(val, new[] { entity, eid });
+            return (bool)res;
+        }
+
+        static bool IsAttached(TContext context, TEntity entity, string listName)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+
+            return EntityExistsInContext(context, entity, listName);
+        }
+
+        static EntityList<TEntity> GetList(TContext context, string listName)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+
+            return context.GetList<TEntity>(listName);
+        }
+
+        #endregion
+
         #region [ Protected Methods ]
 
         protected virtual void Dispose(bool disposing)
@@ -176,6 +216,32 @@ namespace SPCore.Linq
             foreach (ObjectChangeConflict changeConflict in changeConflicts)
             {
                 changeConflict.Resolve(RefreshMode.KeepChanges);
+            }
+        }
+
+        protected virtual void OnSaveEntity(TContext context, EntityList<TEntity> list, TEntity entity)
+        {
+            if (!entity.Id.HasValue)
+                entity.EntityState = EntityState.ToBeInserted;
+
+            if (entity.EntityState == EntityState.Unchanged)
+                return;
+
+            if (context == this.Context)
+            {
+                if (!IsAttached(context, entity, this.MetaData.Name))
+                {
+                    list.Attach(entity);
+                }
+            }
+            else
+            {
+                list.Attach(entity);
+            }
+
+            if (entity.Id.HasValue)
+            {
+                context.Refresh(RefreshMode.KeepCurrentValues, entity);
             }
         }
 
@@ -384,52 +450,19 @@ namespace SPCore.Linq
         /// Save entity
         /// </summary>
         /// <param name="entity">entity</param>
-        /// <param name="safely"></param>
-        public void SaveEntity(TEntity entity, bool safely = false)
+        public void SaveEntity(TEntity entity)
         {
-            if (safely)
-            {
-                SaveEntitySafely(entity);
-                return;
-            }
-
             //if (Context == null) { throw new ArgumentException("Context"); }
-
-            if (!entity.Id.HasValue)
-                entity.EntityState = EntityState.ToBeInserted;
-
-            if (entity.EntityState == EntityState.Unchanged)
-                return;
-
-            if (!IsAttached(Context, entity, MetaData.Name))
-            {
-                List.Attach(entity);
-
-                if (entity.Id.HasValue)
-                {
-                    Context.Refresh(RefreshMode.KeepCurrentValues, entity);
-                }
-            }
+            OnSaveEntity(Context, List, entity);
         }
 
-        private void SaveEntitySafely(TEntity entity)
+        public void SaveEntityNow(TEntity entity, ConflictMode conflictMode = ConflictMode.FailOnFirstConflict, bool systemUpdate = false)
         {
-            using (TContext ctx = CreateContext(CrossSite))
+            using (TContext context = CreateContext(CrossSite))
             {
-                if (!entity.Id.HasValue)
-                    entity.EntityState = EntityState.ToBeInserted;
-
-                if (entity.EntityState == EntityState.Unchanged)
-                    return;
-
-                GetList(ctx, ListName).Attach(entity);
-
-                if (entity.Id.HasValue)
-                {
-                    ctx.Refresh(RefreshMode.KeepCurrentValues, entity);
-                }
-
-                Commit(ctx, ConflictMode.FailOnFirstConflict, false);
+                EntityList<TEntity> list = GetList(context, ListName);
+                OnSaveEntity(context, list, entity);
+                Commit(context, conflictMode, systemUpdate);
             }
         }
 
@@ -615,43 +648,6 @@ namespace SPCore.Linq
             }
 
             return context;
-        }
-
-        /// <summary>
-        /// Check entity is attached to context
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="entity">entity</param>
-        /// <param name="listName"></param>
-        /// <returns>true - attached, false - is not attached</returns>
-        static bool EntityExistsInContext(TContext context, TEntity entity, string listName)
-        {
-            //if (context == null) { throw new ArgumentException("Context"); }
-
-            Type type = context.GetType();
-            PropertyInfo pi = type.GetProperty("EntityTracker", BindingFlags.NonPublic | BindingFlags.Instance);
-            var val = pi.GetValue(context, null);
-            Type trackerType = val.GetType();
-            Type eidType =
-                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
-            var eid = Activator.CreateInstance(eidType, context.Web, listName);
-            MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
-            var res = mi.Invoke(val, new[] { entity, eid });
-            return (bool)res;
-        }
-
-        static bool IsAttached(TContext context, TEntity entity, string listName)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-
-            return EntityExistsInContext(context, entity, listName);
-        }
-
-        static EntityList<TEntity> GetList(TContext context, string listName)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-
-            return context.GetList<TEntity>(listName);
         }
 
         #endregion

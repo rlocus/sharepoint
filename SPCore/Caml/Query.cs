@@ -99,14 +99,16 @@ namespace SPCore.Caml
 
         public SPQuery ToSPQuery()
         {
-            var query = new SPQuery { Query = this.ToString() };
+            var query = new SPQuery { Query = this.ToString(false) };
             return query;
         }
 
         public SPQuery ToSPQuery(params string[] viewFields)
         {
+            if (viewFields == null) throw new ArgumentNullException("viewFields");
+
             SPQuery query = ToSPQuery();
-            return query.WithViewFields(viewFields);
+            return query.Include(viewFields);
         }
 
         public static Query Parse(string existingQuery)
@@ -150,6 +152,16 @@ namespace SPCore.Caml
                            OrderBy = OrderBy.Combine(firstQuery.OrderBy, secondQuery.OrderBy),
                            GroupBy = GroupBy.Combine(firstQuery.GroupBy, secondQuery.GroupBy)
                        };
+        }
+
+        public static Query GetFromSPQuery(SPQuery spQuery)
+        {
+            return spQuery != null ? Parse(string.Format("<Query>{0}</Query>", spQuery.Query)) : null;
+        }
+
+        public static implicit operator Query(SPQuery spQuery)
+        {
+            return GetFromSPQuery(spQuery);
         }
     }
 }

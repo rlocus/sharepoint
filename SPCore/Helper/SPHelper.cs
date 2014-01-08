@@ -154,7 +154,7 @@ namespace SPCore.Helper
 
             do
             {
-                SPListItemCollection items = sourceDocLib.GetItems(query.WithViewScope(SPViewScope.FilesOnly));
+                SPListItemCollection items = sourceDocLib.GetItems(query.InScope(SPViewScope.FilesOnly));
                 listItemCollectionPosition = items.ListItemCollectionPosition;
 
                 foreach (SPListItem item in items)

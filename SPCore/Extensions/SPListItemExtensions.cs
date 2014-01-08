@@ -165,6 +165,11 @@ namespace SPCore
             {
                 return GetValue(item, fieldName);
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
             catch
             {
                 return null;
@@ -184,6 +189,11 @@ namespace SPCore
             {
                 return GetValue(item, fieldId);
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
             catch
             {
                 return null;
@@ -204,6 +214,11 @@ namespace SPCore
                 value = GetValue<T>(item, fieldName);
                 return true;
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
             catch
             {
                 value = default(T);
@@ -224,6 +239,11 @@ namespace SPCore
                 value = GetValue<T>(item, fieldId);
                 return true;
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
             catch
             {
                 value = default(T);
@@ -606,6 +626,17 @@ namespace SPCore
             {
                 item[SPBuiltInFieldId.ContentTypeId] = ct.Id;
             }
+        }
+
+        /// <summary>
+        /// Checks if the list contains a field with the specified name
+        /// </summary>
+        /// <param name="item">The SPListItem item</param>
+        /// <param name="fieldName">The name of the Field</param>
+        /// <returns><c>True</c> if the field exits, otherwisr <c>False</c></returns>
+        public static bool Contains(this SPListItem item, string fieldName)
+        {
+            return item.Fields.ContainsField(fieldName);
         }
 
         #endregion

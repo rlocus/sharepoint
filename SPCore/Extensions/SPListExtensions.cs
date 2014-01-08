@@ -166,7 +166,7 @@ namespace SPCore
 
             do
             {
-                SPListItemCollection items = list.GetItems(spQuery.WithViewScope(SPViewScope.Recursive));
+                SPListItemCollection items = list.GetItems(spQuery.InScope(SPViewScope.Recursive));
                 listItemCollectionPosition = items.ListItemCollectionPosition;
 
                 if (list.ItemCount != 0)
@@ -349,11 +349,11 @@ namespace SPCore
 
             if (query == null)
             {
-                query = new Query() { Where = where }.ToSPQuery().WithViewScope(SPViewScope.Recursive);
+                query = new Query() { Where = where }.ToSPQuery().InScope(SPViewScope.Recursive);
             }
             else
             {
-                Query q = query.GetQueryObject();
+                Query q = Query.GetFromSPQuery(query);
                 q.Where = q.Where != null ? Where.Combine(q.Where, where) : where;
                 query.Query = q.ToString(false);
             }
