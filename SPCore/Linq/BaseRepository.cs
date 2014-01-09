@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,6 +13,7 @@ using System.Xml.Linq;
 using Microsoft.Office.Server.Utilities;
 using Microsoft.SharePoint;
 using Microsoft.SharePoint.Linq;
+using EntityState = Microsoft.SharePoint.Linq.EntityState;
 
 namespace SPCore.Linq
 {
@@ -135,6 +138,30 @@ namespace SPCore.Linq
             }
 
             return context;
+        }
+
+        private void RunAsAdmin(SPSecurity.CodeToRunElevated secureCode)
+        {
+            bool nullUserFlag = (SPContext.Current != null && IsAnonymous);
+
+            if (nullUserFlag)
+            {
+                HttpContext backupCtx = HttpContext.Current;
+
+                try
+                {
+                    HttpContext.Current = null;
+                    SPSecurity.RunWithElevatedPrivileges(secureCode);
+                }
+                finally
+                {
+                    HttpContext.Current = backupCtx;
+                }
+            }
+            else
+            {
+                SPSecurity.RunWithElevatedPrivileges(secureCode);
+            }
         }
 
         private void Commit(TContext context, ConflictMode conflictMode, bool systemUpdate)
@@ -537,23 +564,6 @@ namespace SPCore.Linq
             return info;
         }
 
-        public void RunAsAdmin(SPSecurity.CodeToRunElevated secureCode)
-        {
-            bool nullUserFlag = (SPContext.Current != null && IsAnonymous);
-
-            if (nullUserFlag)
-            {
-                HttpContext backupCtx = HttpContext.Current;
-                HttpContext.Current = null;
-                SPSecurity.RunWithElevatedPrivileges(secureCode);
-                HttpContext.Current = backupCtx;
-            }
-            else
-            {
-                SPSecurity.RunWithElevatedPrivileges(secureCode);
-            }
-        }
-
         public SPQuery GetSPQuery(IQueryable<TEntity> query)
         {
             if (Context == null) { throw new ArgumentException("Context"); }
@@ -648,6 +658,65 @@ namespace SPCore.Linq
             }
 
             return context;
+        }
+
+        public DataTable GetDataTable(IEnumerable<TEntity> entities)
+        {
+            DataTable table = new DataTable(MetaData.Name);
+
+            PropertyInfo[] properties = typeof(TEntity).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            var dicProperties = new Dictionary<PropertyInfo, ColumnAttribute>();
+
+            foreach (PropertyInfo property in properties)
+            {
+                ColumnAttribute columnAttribute = property.GetCustomAttributes(typeof(ColumnAttribute), false).FirstOrDefault() as ColumnAttribute;
+
+                if (columnAttribute != null)
+                {
+                    string columnName = columnAttribute.IsLookupId ? string.Format("{0}_ID", columnAttribute.Name) : columnAttribute.Name;
+
+                    if (table.Columns.Contains(columnName))
+                    {
+                        if (columnName != property.Name)
+                        {
+                            table.Columns.Add(property.Name,
+                                Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                            dicProperties.Add(property, null);
+                        }
+                    }
+                    else
+                    {
+                        table.Columns.Add(columnName,
+                            Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                        dicProperties.Add(property, columnAttribute);
+                    }
+                }
+            }
+
+            foreach (TEntity entity in entities)
+            {
+                DataRow row = table.NewRow();
+
+                foreach (var dicProperty in dicProperties)
+                {
+                    PropertyInfo property = dicProperty.Key;
+                    ColumnAttribute columnAttribute = dicProperty.Value;
+
+                    if (columnAttribute == null)
+                    {
+                        row[property.Name] = property.GetValue(entity, null) ?? DBNull.Value;
+                    }
+                    else
+                    {
+                        string columnName = columnAttribute.IsLookupId ? string.Format("{0}_ID", columnAttribute.Name) : columnAttribute.Name;
+                        row[columnName] = property.GetValue(entity, null) ?? DBNull.Value;
+                    }
+                }
+
+                table.Rows.Add(row);
+            }
+
+            return table;
         }
 
         #endregion

@@ -110,6 +110,7 @@
     <Compile Include="Cache\ICachedObject.cs" />
     <Compile Include="Cache\SPCache.cs" />
     <Compile Include="Cache\SPListQueryCache.cs" />
+    <Compile Include="Cache\SPListQueryCachedData.cs" />
     <Compile Include="Caml\Clauses\Clause.cs" />
     <Compile Include="Caml\Clauses\GroupBy.cs" />
     <Compile Include="Caml\Clauses\OrderBy.cs" />

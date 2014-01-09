@@ -17,15 +17,28 @@ namespace SPCore.Cache
 
         private class CachedObjectImpl<T> : ICachedObject<T>
         {
+            private static object _lock = new object();
             readonly Func<T> _loader;
             readonly List<string> _keys = new List<string>();
             CacheItemPriority _priority = CacheItemPriority.Normal;
             DateTime _absoluteExpiration = System.Web.Caching.Cache.NoAbsoluteExpiration;
             TimeSpan _slidingExpiration = System.Web.Caching.Cache.NoSlidingExpiration;
+            private T _cachedObject;
 
             public T CachedObject
             {
-                get { return GetObject(); }
+                get
+                {
+                    if (Equals(_cachedObject, default(T)))
+                    {
+                        _cachedObject = GetObject();
+                    }
+                    return _cachedObject;
+                }
+                set
+                {
+                    _cachedObject = value;
+                }
             }
 
             private T GetObject()
@@ -35,9 +48,9 @@ namespace SPCore.Cache
                 // try to get the query result from the cache
                 T result;
 
-                if (!Get(key, out result))
+                if (!Get(key, out result) && _loader != null)
                 {
-                    if (_loader != null)
+                    lock (_lock)
                     {
                         result = _loader();
                         Add(result, key);
@@ -116,6 +129,11 @@ namespace SPCore.Cache
                 return HttpRuntime.Cache[CacheKey] != null;
             }
 
+            public void Update()
+            {
+                Add(_cachedObject, CacheKey);
+            }
+
             public string CacheKey
             {
                 get { return string.Join("_", _keys.OrderBy(x => x).ToArray()); }
@@ -132,19 +150,6 @@ namespace SPCore.Cache
                     _priority,
                     null); // no removal notification
             }
-
-            //private void Add(T o, string key, uint cacheExpirationMinutes)
-            //{
-            //    HttpRuntime.Cache.Insert(
-            //      key,
-            //      o,
-            //        null, // no cache dependency
-            //      DateTime.Now.AddMinutes(cacheExpirationMinutes),
-            //      _slidingExpiration,
-            //      _priority,
-            //      null); // no removal notification
-            //}
-
 
             /// <summary>
             /// Retrieve cached item

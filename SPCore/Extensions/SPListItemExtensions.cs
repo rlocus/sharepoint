@@ -257,6 +257,70 @@ namespace SPCore
             return (T)o;
         }
 
+        public static object GetValue(this SPListItemVersion itemVersion, string fieldName)
+        {
+            SPField field = itemVersion.Fields.GetField(fieldName);
+            object value = itemVersion[field.InternalName];
+            return value != null ? field.GetFieldValue(value.ToString()) : null;
+        }
+
+        public static object GetValue(this SPListItemVersion itemVersion, Guid fieldId)
+        {
+            SPField field = itemVersion.Fields[fieldId];
+            object value = itemVersion[field.InternalName];
+            return value != null ? field.GetFieldValue(value.ToString()) : null;
+        }
+
+        public static T GetValue<T>(this SPListItemVersion itemVersion, string fieldName)
+        {
+            object o = GetValue(itemVersion, fieldName);
+            return (T)o;
+        }
+
+        public static T GetValue<T>(this SPListItemVersion itemVersion, Guid fieldId)
+        {
+            object o = GetValue(itemVersion, fieldId);
+            return (T)o;
+        }
+
+        public static bool TryGetValue<T>(this SPListItemVersion itemVersion, string fieldName, out T value)
+        {
+            try
+            {
+                value = GetValue<T>(itemVersion, fieldName);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
+            catch
+            {
+                value = default(T);
+                return false;
+            }
+        }
+
+        public static bool TryGetValue<T>(this SPListItemVersion itemVersion, Guid fieldId, out T value)
+        {
+            try
+            {
+                value = GetValue<T>(itemVersion, fieldId);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            //TODO: define the type of exception
+            catch
+            {
+                value = default(T);
+                return false;
+            }
+        }
+
         //public static string GetLookupValue(this SPListItem item, string fieldName)
         //{
         //    object value = GetValue(item, fieldName);

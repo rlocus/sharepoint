@@ -1,23 +1,36 @@
 ﻿using System;
 using System.Data;
-using System.Globalization;
+using System.Xml.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore.Cache
 {
     public class SPListQueryCache
     {
-        private SPListCachedData _cachedData;
+        private readonly SPList _list;
 
-        public SPListQueryCache(Guid listId)
+        public SPListQueryCache(SPWeb web, Guid listId)
         {
-            _cachedData = new SPListCachedData(SPContext.Current.Site.ID, SPContext.Current.Web.ID, listId);
+            if (web == null) throw new ArgumentNullException("web");
+
+            _list = web.Lists[listId];
         }
 
-        public bool HasListChanged()
+        public SPListQueryCache(SPList list)
         {
-            SPList list = SPContext.Current.Web.Lists[_cachedData.ListId];
+            if (list == null) throw new ArgumentNullException("list");
 
+            _list = list;
+        }
+
+        public TimeSpan CacheTime
+        {
+            get;
+            set;
+        }
+
+        private static bool HasListChanged(SPList list, SPListQueryCachedData listQueryCachedData)
+        {
             DateTime lastItemModifiedDate = list.LastItemModifiedDate;
 
             if (list.LastItemDeletedDate > lastItemModifiedDate)
@@ -25,76 +38,100 @@ namespace SPCore.Cache
                 lastItemModifiedDate = list.LastItemDeletedDate;
             }
 
-            return _cachedData.LastItemModifiedDate != lastItemModifiedDate || _cachedData.ItemCount != list.ItemCount;
+            return listQueryCachedData.LastItemModifiedDate != lastItemModifiedDate ||
+                   listQueryCachedData.ItemCount != list.ItemCount;
         }
 
-        private SPListCachedData LoadData(SPQuery query)
+        private static SPListQueryCachedData GetListQueryCachedData(SPList list, string viewXml)
         {
-            if (SPContext.Current.Site.ID == _cachedData.SiteId && SPContext.Current.Web.ID == _cachedData.WebId)
+            SPListQueryCachedData listQueryCachedData = GetListQueryCachedData(list);
+
+            if (!string.IsNullOrEmpty(viewXml))
             {
-                SPList list = SPContext.Current.Web.Lists[_cachedData.ListId];
-
-                DateTime lastItemModifiedDate = list.LastItemModifiedDate;
-
-                if (list.LastItemDeletedDate > lastItemModifiedDate)
-                {
-                    lastItemModifiedDate = list.LastItemDeletedDate;
-                }
-                _cachedData.LastItemModifiedDate = lastItemModifiedDate;
-                _cachedData.ItemCount = list.ItemCount;
-                _cachedData.Data = list.GetItems(query).GetDataTable();
+                listQueryCachedData.Add(Guid.NewGuid().ToString(), viewXml);
             }
 
-            return _cachedData;
+            return listQueryCachedData;
         }
 
-        private ICachedObject<SPListCachedData> GetCache(SPQuery query)
+        private static SPListQueryCachedData GetListQueryCachedData(SPList list)
         {
-            ICachedObject<SPListCachedData> cache =
-               SPCache.Cache(() => LoadData(query))
-                   .By(query.ViewXml.GetHashCode().ToString(CultureInfo.InvariantCulture),
-                       _cachedData.ListId.ToString(),
-                       _cachedData.WebId.ToString(),
-                       _cachedData.SiteId.ToString())
-                   .ByCurrentUser();
-            _cachedData = cache.CachedObject;
-            return cache;
+            SPListQueryCachedData listQueryCachedData = new SPListQueryCachedData(list.ParentWeb.Site.ID, list.ParentWeb.ID, list.ID, list.ParentWeb.CurrentUser.Sid);
+
+            DateTime lastModifiedDate = list.LastItemModifiedDate;
+
+            if (list.LastItemDeletedDate > lastModifiedDate)
+            {
+                lastModifiedDate = list.LastItemDeletedDate;
+            }
+
+            listQueryCachedData.LastItemModifiedDate = lastModifiedDate;
+            listQueryCachedData.ItemCount = list.ItemCount;
+
+            return listQueryCachedData;
+        }
+
+        private static DataTable LoadDataTable(SPList list, SPQuery query)
+        {
+            return list.GetItems(query).GetDataTable();
+        }
+
+        private DataTable GetData(SPList list, SPQuery query)
+        {
+            if (string.IsNullOrEmpty(query.ViewFields))
+            {
+                throw new ArgumentException("The ViewFields property for SPQuery hasn't been set.");
+            }
+
+            string viewXml = XElement.Parse(query.ViewXml, LoadOptions.None).ToString(SaveOptions.DisableFormatting);
+
+            ICachedObject<SPListQueryCachedData> queryCache =
+                SPCache.Cache(() => GetListQueryCachedData(list, viewXml))
+                    .By(list.ID.ToString(),
+                        list.ParentWeb.ID.ToString(),
+                        list.ParentWeb.Site.ID.ToString(),
+                        list.ParentWeb.CurrentUser.Sid);
+
+            if (CacheTime != default(TimeSpan))
+            {
+                queryCache.ForSliding(CacheTime);
+            }
+
+            SPListQueryCachedData listQueryCachedData = queryCache.CachedObject;
+
+            string keyQuery;
+
+            if (HasListChanged(list, listQueryCachedData))
+            {
+                listQueryCachedData.Clear();
+                listQueryCachedData = GetListQueryCachedData(list);
+                keyQuery = Guid.NewGuid().ToString();
+                listQueryCachedData.Add(keyQuery, viewXml);
+                queryCache.CachedObject = listQueryCachedData;
+                queryCache.Update();
+            }
+            else
+            {
+                keyQuery = listQueryCachedData.FindKey(viewXml);
+            }
+
+            ICachedObject<DataTable> dataCache = listQueryCachedData.GetDataCache(keyQuery, () => LoadDataTable(list, query));
+
+            if (CacheTime != default(TimeSpan))
+            {
+                dataCache.ForSliding(CacheTime);
+            }
+
+            return dataCache.CachedObject;
         }
 
         public DataTable GetByQuery(SPQuery query)
         {
-            ICachedObject<SPListCachedData> cache = GetCache(query);
-
-            if (HasListChanged())
+            using (SPWeb web = _list.ParentWeb.Site.OpenWeb(_list.ParentWeb.ID))
             {
-                cache.Clear();
-                GetCache(query);
+                SPList list = web.Lists.GetList(_list.ID, true, true);
+                return GetData(list, query);
             }
-
-            return _cachedData.Data;
         }
     }
-
-    /// <summary>
-    /// Information holding object for a SharePoint List cache dependency object.
-    /// </summary>
-    public class SPListCachedData
-    {
-        public SPListCachedData(Guid siteId, Guid webId, Guid listId)
-        {
-            SiteId = siteId;
-            WebId = webId;
-            ListId = listId;
-        }
-
-        public Guid SiteId { get; private set; }
-        public Guid WebId { get; private set; }
-        public Guid ListId { get; private set; }
-
-        public DateTime LastItemModifiedDate { get; set; }
-        public int ItemCount { get; set; }
-
-        public DataTable Data { get; set; }
-    }
-
 }

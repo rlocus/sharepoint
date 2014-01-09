@@ -378,5 +378,20 @@ namespace SPCore
                 }
             }
         }
+
+        public static void RemoveRelatedFields(this SPList list, SPRelationshipDeleteBehavior? deleteBehavior)
+        {
+            var relatedFields = list.Fields.OfType<SPFieldLookup>().Where(field => field.IsRelationship && field.Indexed);
+            relatedFields = deleteBehavior == null
+                ? relatedFields.Where(field => field.RelationshipDeleteBehavior == SPRelationshipDeleteBehavior.None ||
+                                        field.RelationshipDeleteBehavior == SPRelationshipDeleteBehavior.Cascade ||
+                                        field.RelationshipDeleteBehavior == SPRelationshipDeleteBehavior.Restrict)
+                : relatedFields.Where(field => field.RelationshipDeleteBehavior == deleteBehavior.Value);
+
+            foreach (SPFieldLookup relatedField in relatedFields.ToList())
+            {
+                relatedField.Delete();
+            }
+        }
     }
 }
