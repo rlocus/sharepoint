@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -59,6 +58,14 @@ namespace SPCore.Linq
                 }
 
                 return _metaData ?? (_metaData = List.GetMetaData());
+            }
+        }
+
+        protected virtual SPList SPList
+        {
+            get
+            {
+                return MetaData.List;
             }
         }
 
@@ -293,47 +300,23 @@ namespace SPCore.Linq
             }
         }
 
-        protected void DeleteEntityVersion(int entityId, int versionId)
-        {
-            SPListItem item = MetaData.List.GetItemById(entityId);
-            SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString(CultureInfo.InvariantCulture));
-            version.Delete();
-        }
+        //protected void DeleteEntityVersion(int entityId, int versionId)
+        //{
+        //    SPListItem item = SPList.GetItemById(entityId);
+        //    SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString(CultureInfo.InvariantCulture));
+        //    version.Delete();
+        //}
 
-        /// <summary>
-        /// Get file representing the entity
-        /// </summary>
-        /// <param name="id">Id</param>
-        /// <returns>SPFile</returns>
-        protected SPFile GetFile(int id)
-        {
-            TEntity entity = GetEntity(id);
-            return GetFile(entity);
-        }
-
-        protected SPFile GetFile(TEntity entity)
-        {
-            if (!entity.Id.HasValue)
-            {
-                throw new ArgumentException("Entity has no id property value.");
-            }
-
-            SPList list = MetaData.List;
-            SPWeb web = list.ParentWeb;
-            SPFile file = web.GetFile(entity.ServerUrl);
-            return file;
-        }
-
-        protected IEnumerable<TEntity> GetVersions(int id)
-        {
-            var item = MetaData.List.GetItemById(id);
-            var versions = item.Versions
-                .Cast<SPListItemVersion>()
-                .Select(v => Activator.CreateInstance(typeof(TEntity), v))
-                .Cast<TEntity>()
-                .ToList();
-            return versions;
-        }
+        //protected IEnumerable<TEntity> GetVersions(int id)
+        //{
+        //    var item = SPList.GetItemById(id);
+        //    var versions = item.Versions
+        //        .Cast<SPListItemVersion>()
+        //        .Select(v => Activator.CreateInstance(typeof(TEntity), v))
+        //        .Cast<TEntity>()
+        //        .ToList();
+        //    return versions;
+        //}
 
         protected bool IsAttached(TContext context, TEntity entity)
         {
@@ -407,8 +390,6 @@ namespace SPCore.Linq
         public IQueryable<TEntity> GetEntityCollection<TKey>(
            Expression<Func<TEntity, bool>> where, string path, bool recursive, Expression<Func<TEntity, TKey>> orderBy, bool descending, int maxRows)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             IQueryable<TEntity> query = (where == null)
                                             ? List.ScopeToFolder(path, recursive)
                                             : List.ScopeToFolder(path, recursive).Where(where);
@@ -429,8 +410,6 @@ namespace SPCore.Linq
         /// <param name="id">Id</param>
         public TEntity GetEntity(int id)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             return List
                 .ScopeToFolder(string.Empty, true)
                 .SingleOrDefault(entry => entry.Id == id);
@@ -438,8 +417,6 @@ namespace SPCore.Linq
 
         public TEntity GetEntity(Expression<Func<TEntity, bool>> where, string path = "", bool recursive = true)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             return List
                 .ScopeToFolder(path, recursive)
                 .FirstOrDefault(where);
@@ -641,19 +618,7 @@ namespace SPCore.Linq
         {
             var caml = GetSPQuery(query);
             var iterator = new ContentIterator();
-            iterator.ProcessListItems(MetaData.List, caml, itemProcessor, (e, i) => true);
-        }
-
-        /// <summary>
-        /// Retrieve versions of entity
-        /// </summary>
-        /// <param name="entity">Entity</param>
-        /// <returns>Collection of entities</returns>
-        public IEnumerable<TEntity> GetVersions(TEntity entity)
-        {
-            if (entity.Id.HasValue)
-                return GetVersions(entity.Id.Value);
-            throw new ArgumentException("Entity has no id property value.");
+            iterator.ProcessListItems(SPList, caml, itemProcessor, (e, i) => true);
         }
 
         public void Dispose()
@@ -744,6 +709,74 @@ namespace SPCore.Linq
             }
 
             return table;
+        }
+
+        public SPFile GetFile(int id)
+        {
+            TEntity entity = GetEntity(id);
+            return GetFile(entity);
+        }
+
+        public SPFile GetFile(TEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            if (!entity.Id.HasValue)
+            {
+                throw new ArgumentException("Entity has no id property value.");
+            }
+
+            SPWeb web = SPList.ParentWeb;
+            SPFile file = web.GetFile(entity.ServerUrl);
+            return file;
+        }
+
+        public SPListItem GetItem(int id)
+        {
+            TEntity entity = GetEntity(id);
+            return GetItem(entity);
+        }
+
+        public SPListItem GetItem(TEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+
+            if (!entity.Id.HasValue)
+            {
+                throw new ArgumentException("Entity has no id property value.");
+            }
+
+            SPListItem item = SPList.GetItemById(entity.Id.Value);
+            return item;
+        }
+
+        public SPListItemVersionCollection GetVersions(int id)
+        {
+            SPListItem item = GetItem(id);
+
+            if (item != null)
+            {
+                var versions = item.Versions;
+                return versions;
+            }
+
+            return null;
+        }
+
+        public SPListItemVersionCollection GetVersions(TEntity entity)
+        {
+            if (entity.Id.HasValue)
+            {
+                return GetVersions(entity.Id.Value);
+            }
+
+            throw new ArgumentException("Entity has no id property value.");
         }
 
         #endregion

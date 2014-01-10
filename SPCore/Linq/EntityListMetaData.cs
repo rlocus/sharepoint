@@ -43,6 +43,8 @@ namespace SPCore.Linq
 
             FieldInfo listField = entityType.GetField("list", BindingFlags.NonPublic | BindingFlags.Instance);
 
+            if (listField == null) return res;
+
             var listValue = listField.GetValue(entityList);
             Type listType = listValue.GetType();
             PropertyInfo[] listProperties = listType.GetProperties();
@@ -95,10 +97,10 @@ namespace SPCore.Linq
                         });
                     }
                 }
-                //else if (listProperty.Name == "List")
-                //{
+                    //else if (listProperty.Name == "List")
+                    //{
                     
-                //}
+                    //}
                 else
                 {
                     PropertyInfo property = typeof(EntityListMetaData).GetProperty(listProperty.Name);
