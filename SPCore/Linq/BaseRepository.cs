@@ -30,6 +30,8 @@ namespace SPCore.Linq
         protected readonly bool ReadOnly;
         protected readonly bool CrossSite;
         protected readonly bool IsAnonymous;
+        private SPList _spList;
+
         #endregion
 
         #region [ Properties ]
@@ -40,10 +42,16 @@ namespace SPCore.Linq
 
         protected EntityList<TEntity> List
         {
-            get { return _list ?? (_list = GetList(Context, ListName)); }
-        }
+            get
+            {
+                if (Context == null)
+                {
+                    throw new ArgumentNullException("Context");
+                }
 
-        private EntityListMetaData _metaData;
+                return _list ?? (_list = GetList(Context, ListName));
+            }
+        }
 
         /// <summary>
         /// EntityList meta data
@@ -52,21 +60,18 @@ namespace SPCore.Linq
         {
             get
             {
-                if (List == null)
+                if (Context == null)
                 {
-                    throw new ArgumentNullException("List");
+                    throw new ArgumentNullException("Context");
                 }
 
-                return _metaData ?? (_metaData = List.GetMetaData());
+                return GetList(Context, ListName).GetMetaData();
             }
         }
 
         protected virtual SPList SPList
         {
-            get
-            {
-                return MetaData.List;
-            }
+            get { return _spList ?? (_spList = MetaData.List ?? this.Context.LatestList); }
         }
 
         protected TextWriter Log { get { return Context.Log; } set { Context.Log = value; } }
@@ -101,9 +106,8 @@ namespace SPCore.Linq
             CrossSite = crossSite;
             ListName = listName;
             WebUrl = webUrl;
-
-            SPContext ctx = SPContext.Current;
-            IsAnonymous = ctx != null && SPContext.Current.Web.CurrentUser == null;
+          
+            IsAnonymous = SPContext.Current != null && SPContext.Current.Web.CurrentUser == null;
             Context = CreateContext(crossSite);
         }
 
@@ -289,7 +293,7 @@ namespace SPCore.Linq
 
             if (context == this.Context)
             {
-                if (!IsAttached(context, entity, this.MetaData.Name))
+                if (!IsAttached(context, entity, SPList.Title))
                 {
                     list.Attach(entity);
                 }
@@ -322,7 +326,7 @@ namespace SPCore.Linq
         {
             if (context == null) throw new ArgumentNullException("context");
 
-            return EntityExistsInContext(context, entity, MetaData.Name);
+            return EntityExistsInContext(context, entity, SPList.Title);
         }
 
         #endregion
@@ -660,7 +664,7 @@ namespace SPCore.Linq
 
         public DataTable GetDataTable(IEnumerable<TEntity> entities)
         {
-            DataTable table = new DataTable(MetaData.Name);
+            DataTable table = new DataTable(SPList.Title);
 
             PropertyInfo[] properties = typeof(TEntity).GetProperties(BindingFlags.Instance | BindingFlags.Public);
             var dicProperties = new Dictionary<PropertyInfo, ColumnAttribute>();

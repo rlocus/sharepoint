@@ -8,6 +8,7 @@ namespace SPCore.Linq
     {
         private SPSite _site;
         private SPWeb _web;
+        private SPList _list;
 
         public EntityDataContext(string requestUrl) :
             base(requestUrl)
@@ -24,10 +25,15 @@ namespace SPCore.Linq
             }
         }
 
+        internal SPList LatestList
+        {
+            get { return _list; }
+        }
+
         public override EntityList<T> GetList<T>(string listName)
         {
-            SPList list = _web.GetListByName(listName);
-            return base.GetList<T>(list.Title);
+            _list = _web.GetListByName(listName);
+            return base.GetList<T>(_list.Title);
         }
 
         protected override void Dispose(bool disposing)
