@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -246,6 +245,33 @@ namespace SPCore.Linq
             }
         }
 
+        //protected override void OnSaveEntity(TContext context, EntityList<TEntity> list, TEntity entity)
+        //{
+        //    if (entity.Manager != null)
+        //    {
+        //        if (entity.Manager.Id == null)
+        //        {
+        //            this.SaveEntityNow((TEntity)entity.Manager);
+
+        //            if (list != this.List)
+        //            {
+        //                list.Attach((TEntity)entity.Manager);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (list != this.List)
+        //            {
+        //                list.Attach((TEntity)entity.Manager);
+        //            }
+
+        //            context.Refresh(RefreshMode.KeepCurrentValues, entity.Manager);
+        //        }
+        //    }
+
+        //    base.OnSaveEntity(context, list, entity);
+        //}
+
         protected virtual void OnSaveEntity(TContext context, EntityList<TEntity> list, TEntity entity)
         {
             if (!entity.Id.HasValue)
@@ -264,11 +290,6 @@ namespace SPCore.Linq
             else
             {
                 list.Attach(entity);
-            }
-
-            if (entity.Id.HasValue)
-            {
-                context.Refresh(RefreshMode.KeepCurrentValues, entity);
             }
         }
 
@@ -312,6 +333,13 @@ namespace SPCore.Linq
                 .Cast<TEntity>()
                 .ToList();
             return versions;
+        }
+
+        protected bool IsAttached(TContext context, TEntity entity)
+        {
+            if (context == null) throw new ArgumentNullException("context");
+
+            return EntityExistsInContext(context, entity, MetaData.Name);
         }
 
         #endregion
@@ -490,6 +518,11 @@ namespace SPCore.Linq
                 EntityList<TEntity> list = GetList(context, ListName);
                 OnSaveEntity(context, list, entity);
                 Commit(context, conflictMode, systemUpdate);
+            }
+
+            if (!IsAttached(this.Context, entity))
+            {
+                this.List.Attach(entity);
             }
         }
 
@@ -673,20 +706,15 @@ namespace SPCore.Linq
 
                 if (columnAttribute != null)
                 {
-                    string columnName = columnAttribute.IsLookupId ? string.Format("{0}_ID", columnAttribute.Name) : columnAttribute.Name;
-
-                    if (table.Columns.Contains(columnName))
+                    if (table.Columns.Contains(columnAttribute.Name))
                     {
-                        if (columnName != property.Name)
-                        {
-                            table.Columns.Add(property.Name,
-                                Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
-                            dicProperties.Add(property, null);
-                        }
+                        table.Columns.Add(property.Name,
+                            Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
+                        dicProperties.Add(property, null);
                     }
                     else
                     {
-                        table.Columns.Add(columnName,
+                        table.Columns.Add(columnAttribute.Name,
                             Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType);
                         dicProperties.Add(property, columnAttribute);
                     }
@@ -708,8 +736,7 @@ namespace SPCore.Linq
                     }
                     else
                     {
-                        string columnName = columnAttribute.IsLookupId ? string.Format("{0}_ID", columnAttribute.Name) : columnAttribute.Name;
-                        row[columnName] = property.GetValue(entity, null) ?? DBNull.Value;
+                        row[columnAttribute.Name] = property.GetValue(entity, null) ?? DBNull.Value;
                     }
                 }
 

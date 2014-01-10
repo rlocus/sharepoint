@@ -18,7 +18,7 @@ namespace SPCore.Linq
     public class EntityItem : ITrackEntityState, ITrackOriginalValues, INotifyPropertyChanged, INotifyPropertyChanging, ICustomMapping
     {
         #region Private Fields
-
+      
         private int? _id;
         private int? _modifiedById;
         private string _modifiedBy;
@@ -39,6 +39,10 @@ namespace SPCore.Linq
         private SPAttachmentCollection _contentAttachments;
         private string _moderationComments;
         private bool? _isCurrentVersion;
+        private bool? _hasCopyDestinations;
+        private string _moderationStatus;
+        private string _contentTypeId;
+        private string _permMask;
 
         #endregion
 
@@ -308,7 +312,7 @@ namespace SPCore.Linq
             }
             set
             {
-                if ((value != _entityState))
+                if (value != _entityState)
                 {
                     _entityState = value;
                 }
@@ -379,6 +383,66 @@ namespace SPCore.Linq
                 OnPropertyChanging("Id", _id);
                 _id = value;
                 OnPropertyChanged("Id");
+            }
+        }
+
+        /// <summary>
+        /// Has Copy Destinations
+        /// </summary>
+        [Column(Name = "_HasCopyDestinations", Storage = "_hasCopyDestinations", ReadOnly = true, FieldType = "Boolean")]
+        public bool? HasCopyDestinations
+        {
+            get
+            {
+                return _hasCopyDestinations;
+            }
+            protected set
+            {
+                if (value == _hasCopyDestinations) return;
+
+                OnPropertyChanging("HasCopyDestinations", _hasCopyDestinations);
+                _hasCopyDestinations = value;
+                OnPropertyChanged("HasCopyDestinations");
+            }
+        }
+
+        /// <summary>
+        /// Approval Status
+        /// </summary>
+        [Column(Name = "_ModerationStatus", Storage = "_moderationStatus", ReadOnly = true, FieldType = "ModStat")]
+        public string ApprovalStatus
+        {
+            get
+            {
+                return _moderationStatus;
+            }
+            protected set
+            {
+                if (value == _moderationStatus) return;
+
+                OnPropertyChanging("ApprovalStatus", _moderationStatus);
+                _moderationStatus = value;
+                OnPropertyChanged("ApprovalStatus");
+            }
+        }
+
+        /// <summary>
+        /// Effective Permissions Mask
+        /// </summary>
+        [Column(Name = "PermMask", Storage = "_permMask", ReadOnly = true, FieldType = "Computed")]
+        public string EffectivePermissionsMask
+        {
+            get
+            {
+                return _permMask;
+            }
+            protected set
+            {
+                if (value == _permMask) return;
+
+                OnPropertyChanging("EffectivePermissionsMask", _permMask);
+                _permMask = value;
+                OnPropertyChanged("EffectivePermissionsMask");
             }
         }
 
@@ -627,8 +691,7 @@ namespace SPCore.Linq
         /// <summary>
         /// Base name. Without path and extension
         /// </summary>
-        [Column(Name = "BaseName", Storage = "_baseName",
-         ReadOnly = true, FieldType = "Computed")]
+        [Column(Name = "BaseName", Storage = "_baseName", ReadOnly = true, FieldType = "Computed")]
         public string BaseName
         {
             get
@@ -645,8 +708,10 @@ namespace SPCore.Linq
             }
         }
 
-        [Column(Name = "ContentType", Storage = "_contentType",
-        ReadOnly = true, FieldType = "Computed")]
+        /// <summary>
+        /// Content Type
+        /// </summary>
+        [Column(Name = "ContentType", Storage = "_contentType", ReadOnly = true, FieldType = "Computed")]
         public string ContentType
         {
             get
@@ -660,6 +725,51 @@ namespace SPCore.Linq
                 OnPropertyChanging("ContentType", _contentType);
                 _contentType = value;
                 OnPropertyChanged("ContentType");
+            }
+        }
+
+        /// <summary>
+        /// Content Type ID
+        /// </summary>
+        [Column(Name = "ContentTypeId", Storage = "_contentTypeId", ReadOnly = true, FieldType = "ContentTypeId")]
+        public string ContentTypeId
+        {
+            get
+            {
+                return _contentTypeId;
+            }
+            protected set
+            {
+                if (value == _contentTypeId) return;
+
+                OnPropertyChanging("ContentTypeId", _contentTypeId);
+                _contentTypeId = value;
+                OnPropertyChanged("ContentTypeId");
+            }
+        }
+
+        /// <summary>
+        /// Attachments of item
+        /// </summary>
+        public SPAttachmentCollection Attachments
+        {
+            get
+            {
+                return _contentAttachments;
+            }
+            set
+            {
+                if (value == _contentAttachments) return;
+
+                if (_contentAttachments == null)
+                {
+                    _contentAttachments = value;
+                    return;
+                }
+
+                OnPropertyChanging("Attachments", _contentAttachments);
+                _contentAttachments = value;
+                OnPropertyChanged("Attachments");
             }
         }
 
@@ -691,31 +801,6 @@ namespace SPCore.Linq
             if (null != PropertyChanging)
             {
                 PropertyChanging(this, new PropertyChangingEventArgs(propertyName));
-            }
-        }
-
-        /// <summary>
-        /// Attachments of item
-        /// </summary>
-        public SPAttachmentCollection Attachments
-        {
-            get
-            {
-                return _contentAttachments;
-            }
-            set
-            {
-                if (value == _contentAttachments) return;
-
-                if (_contentAttachments == null)
-                {
-                    _contentAttachments = value;
-                    return;
-                }
-
-                OnPropertyChanging("Attachments", _contentAttachments);
-                _contentAttachments = value;
-                OnPropertyChanged("Attachments");
             }
         }
 
