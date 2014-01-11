@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <!-- Parent ContentType: Элемент (0x01) -->
+  <ContentType ID="0x01007087da17f20149e3a4602e517e6e8eef"
+               Name="Branch"
+               Group="SPCore Examples"
+               Description=""
+               Inherits="TRUE"
+               Version="0">
+    <FieldRefs>
+      <FieldRef ID="{549895f0-fb27-41dd-95a0-a176a086fc1b}" Name="CompanyIn" DisplayName="CompanyIn" />
+      <FieldRef ID="{61cb30a2-5775-4e40-8694-9fd5696cdd10}" Name="PostAddress" DisplayName="PostAddress" />
+      <FieldRef ID="{a7b3954c-6d59-43c4-94e0-6ab377c95124}" Name="City" DisplayName="City" />
+    </FieldRefs>
+  </ContentType>
+  <Field ID="{549895f0-fb27-41dd-95a0-a176a086fc1b}" Name="CompanyIn" DisplayName="Company" Type="Lookup"
+       ShowField="Title" List="Lists/Companies" Mult="FALSE" EnforceUniqueValues="FALSE"
+       UnlimitedLengthInDocumentLibrary="FALSE" RelationshipDeleteBehavior="None" ></Field>
+  <Field ID="{61cb30a2-5775-4e40-8694-9fd5696cdd10}" Name="PostAddress" DisplayName="Address" Type="Note"></Field>
+  <Field ID="{a7b3954c-6d59-43c4-94e0-6ab377c95124}" Name="City" DisplayName="Address" Type="Text"></Field>
+</Elements>

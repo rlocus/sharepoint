@@ -38,75 +38,84 @@ namespace SPCore.Linq
         {
             EntityListMetaData res = new EntityListMetaData();
 
-            IEnumerable<string> propNames = typeof(EntityListMetaData).GetProperties().Select(p => p.Name);
+            var propNames = typeof(EntityListMetaData).GetProperties().Select(p => p.Name).ToList();
             Type entityType = typeof(EntityList<T>);
 
             FieldInfo listField = entityType.GetField("list", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            if (listField == null) return res;
-
-            var listValue = listField.GetValue(entityList);
-            Type listType = listValue.GetType();
-            PropertyInfo[] listProperties = listType.GetProperties();
-
-            foreach (PropertyInfo listProperty in listProperties)
+            if (listField != null)
             {
-                if (!propNames.Contains(listProperty.Name)) { continue; }
+                var listValue = listField.GetValue(entityList);
+                Type listType = listValue.GetType();
+                PropertyInfo[] listProperties = listType.GetProperties();
 
-                var listPropertyValue = listProperty.GetValue(listValue, null);
-
-                if (listProperty.Name == "ContentTypes")
+                foreach (PropertyInfo listProperty in listProperties)
                 {
-                    IEnumerable ctypes = listPropertyValue as IEnumerable;
-
-                    if (ctypes != null)
+                    if (!propNames.Contains(listProperty.Name))
                     {
-                        res.ContentTypes = ctypes.Cast<object>().Select(ctype => new EntityListContentTypeInfo
-                        {
-                            Id = ctype.GetPropertyValue<string>("Id"),
-                            Name = ctype.GetPropertyValue<string>("Name"),
-                            Description = ctype.GetPropertyValue<string>("Description"),
-                            Hidden = ctype.GetPropertyValue<bool>("Hidden")
-                        });
+                        continue;
                     }
-                }
-                else if (listProperty.Name == "Fields")
-                {
-                    res.Fields = new List<EntityListFieldInfo>();
-                    IEnumerable fields = listPropertyValue as IEnumerable;
 
-                    if (fields != null)
+                    var listPropertyValue = listProperty.GetValue(listValue, null);
+
+                    if (listProperty.Name == "ContentTypes")
                     {
-                        res.Fields = fields.Cast<object>().Select(field => new EntityListFieldInfo
+                        IEnumerable ctypes = listPropertyValue as IEnumerable;
+
+                        if (ctypes != null)
                         {
-                            Id = field.GetPropertyValue<Guid>("Id"),
-                            Title = field.GetPropertyValue<string>("Title"),
-                            InternalName = field.GetPropertyValue<string>("InternalName"),
-                            //FieldType = field.GetPropertyValue<SPFieldType>("FieldType"),
-                            //AllowMultipleValues = field.GetPropertyValue<bool>("AllowMultipleValues"),
-                            //Choices = field.GetPropertyValue<IEnumerable>("Choices"),
-                            //FillInChoice = field.GetPropertyValue<bool>("FillInChoice"),
-                            Hidden = field.GetPropertyValue<bool>("Hidden"),
-                            IsCalculated = field.GetPropertyValue<bool>("IsCalculated"),
-                            ReadOnlyField = field.GetPropertyValue<bool>("ReadOnlyField"),
-                            Required = field.GetPropertyValue<bool>("Required"),
-                            Description = field.GetPropertyValue<string>("Description"),
-                            //LookupDisplayColumn = field.GetPropertyValue<string>("LookupDisplayColumn"),
-                            //LookupList = field.GetPropertyValue<string>("LookupList"),
-                            //PrimaryFieldId = field.GetPropertyValue<string>("PrimaryFieldId")
-                        });
+                            res.ContentTypes = ctypes.Cast<object>().Select(ctype => new EntityListContentTypeInfo
+                            {
+                                Id = ctype.GetPropertyValue<string>("Id"),
+                                Name = ctype.GetPropertyValue<string>("Name"),
+                                Description = ctype.GetPropertyValue<string>("Description"),
+                                Hidden = ctype.GetPropertyValue<bool>("Hidden")
+                            });
+                        }
                     }
-                }
-                    //else if (listProperty.Name == "List")
-                    //{
-                    
-                    //}
-                else
-                {
-                    PropertyInfo property = typeof(EntityListMetaData).GetProperty(listProperty.Name);
-                    property.SetValue(res, listPropertyValue, null);
+                    else if (listProperty.Name == "Fields")
+                    {
+                        res.Fields = new List<EntityListFieldInfo>();
+                        IEnumerable fields = listPropertyValue as IEnumerable;
+
+                        if (fields != null)
+                        {
+                            res.Fields = fields.Cast<object>().Select(field => new EntityListFieldInfo
+                            {
+                                Id = field.GetPropertyValue<Guid>("Id"),
+                                Title = field.GetPropertyValue<string>("Title"),
+                                InternalName = field.GetPropertyValue<string>("InternalName"),
+                                //FieldType = field.GetPropertyValue<SPFieldType>("FieldType"),
+                                //AllowMultipleValues = field.GetPropertyValue<bool>("AllowMultipleValues"),
+                                //Choices = field.GetPropertyValue<IEnumerable>("Choices"),
+                                //FillInChoice = field.GetPropertyValue<bool>("FillInChoice"),
+                                Hidden = field.GetPropertyValue<bool>("Hidden"),
+                                IsCalculated = field.GetPropertyValue<bool>("IsCalculated"),
+                                ReadOnlyField = field.GetPropertyValue<bool>("ReadOnlyField"),
+                                Required = field.GetPropertyValue<bool>("Required"),
+                                Description = field.GetPropertyValue<string>("Description"),
+                                //LookupDisplayColumn = field.GetPropertyValue<string>("LookupDisplayColumn"),
+                                //LookupList = field.GetPropertyValue<string>("LookupList"),
+                                //PrimaryFieldId = field.GetPropertyValue<string>("PrimaryFieldId")
+                            });
+                        }
+                    }
+                        //else if (listProperty.Name == "List")
+                        //{
+
+                        //}
+                    else
+                    {
+                        PropertyInfo property = typeof (EntityListMetaData).GetProperty(listProperty.Name);
+
+                        if (property != null)
+                        {
+                            property.SetValue(res, listPropertyValue, null);
+                        }
+                    }
                 }
             }
+
             return res;
         }
     }

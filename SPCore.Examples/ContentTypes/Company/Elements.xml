@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <!-- Parent ContentType: Элемент (0x01) -->
+  <ContentType ID="0x010065d24f25bfad4e9cbaf3be9bab46a499"
+               Name="Company"
+               Group="SPCore Examples"
+               Description=""
+               Inherits="TRUE"
+               Version="0">
+    <FieldRefs>
+      <FieldRef ID="{14300337-27b7-4b44-ad3e-550e1b0fda8d}" Name="WebSite" DisplayName="WebSite" />
+      <FieldRef ID="{700e213e-1355-45ae-9c31-bcea561f7bd1}" Name="LogoType" DisplayName="LogoType" />
+    </FieldRefs>
+  </ContentType>
+  <Field ID="{14300337-27b7-4b44-ad3e-550e1b0fda8d}" Name="WebSite" DisplayName="WebSite" Type="URL"
+       Format="Hyperlink"></Field>
+  <Field ID="{700e213e-1355-45ae-9c31-bcea561f7bd1}" Name="LogoType" DisplayName="LogoType" Type="URL"
+         Format="Image"></Field>
+</Elements>

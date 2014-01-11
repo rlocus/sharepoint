@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <!-- Parent ContentType: Элемент (0x01) -->
+  <ContentType ID="0x01007236633166654687abcecfed51dca642"
+               Name="Department"
+               Group="SPCore Examples"
+               Description=""
+               Inherits="TRUE"
+               Version="0">
+    <FieldRefs>
+      <!--<FieldRef ID="{f31ed6c7-aa89-4917-9ddc-7757a0d5fedc}" Name="HeadOf" DisplayName="HeadOf" />
+      <FieldRef ID="{aee00922-782b-40db-b03d-f1045b07de57}" Name="Branch" DisplayName="Branch" />-->
+    </FieldRefs>
+  </ContentType>
+  <!--<Field ID="{f31ed6c7-aa89-4917-9ddc-7757a0d5fedc}" Name="HeadOf" DisplayName="HeadOf" Type="Lookup"
+       ShowField="Title" List="Lists/Employees" Mult="FALSE"></Field>
+  <Field ID="{aee00922-782b-40db-b03d-f1045b07de57}" Name="Branch" DisplayName="Branch" Type="Lookup"
+         ShowField="Title" List="Lists/Branches" Mult="FALSE"></Field>-->
+</Elements>

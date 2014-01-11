@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.SharePoint;
 using Microsoft.SharePoint.Linq;
 
@@ -6,13 +8,22 @@ namespace SPCore.Linq
 {
     public class EntityDataContext : DataContext
     {
+        #region [ Fields ]
+
         private SPSite _site;
         private SPWeb _web;
-        private SPList _list;
+
+        private readonly Dictionary<string, SPList> _loadedLists;
+
+        #endregion
+
+        #region [ Constructror ]
 
         public EntityDataContext(string requestUrl) :
             base(requestUrl)
         {
+            _loadedLists = new Dictionary<string, SPList>();
+
             if (SPContext.Current != null)
             {
                 this._site = SPContext.Current.Site;
@@ -25,42 +36,11 @@ namespace SPCore.Linq
             }
         }
 
-        internal SPList LatestList
-        {
-            get { return _list; }
-        }
+        #endregion
 
-        public override EntityList<T> GetList<T>(string listName)
-        {
-            _list = _web.GetListByName(listName);
-            return base.GetList<T>(_list.Title);
-        }
+        #region [ Properties ]
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (!disposing) return;
-
-            if (_web != null && (SPContext.Current == null || _web != SPContext.Current.Web))
-            {
-                try
-                {
-                    _web.Dispose();
-                }
-                catch { }
-                _web = null;
-            }
-            if (_site != null && (SPContext.Current == null || _site != SPContext.Current.Site))
-            {
-                try
-                {
-                    _site.Dispose();
-                }
-                catch { }
-                _site = null;
-            }
-        }
+        internal SPList LatestList { get; private set; }
 
         /// <summary>
         /// Use the Tasks list to keep track of work that you or your team needs to complete.
@@ -185,6 +165,89 @@ namespace SPCore.Linq
             }
         }
 
+        #endregion
+
+        #region [ Private methods ]
+
+        /// <summary>
+        /// Check entity is attached to context
+        /// </summary>
+        /// <param name="entity">entity</param>
+        /// <param name="listName"></param>
+        /// <returns>true - attached, false - is not attached</returns>
+        private bool EntityExistsInContext<TEntity>(TEntity entity, string listName) where TEntity : EntityItem
+        {
+            Type type = typeof(DataContext);
+            PropertyInfo pi = type.GetProperty("EntityTracker", BindingFlags.NonPublic | BindingFlags.Instance);
+            var val = pi.GetValue(this, null);
+            Type trackerType = val.GetType();
+            Type eidType = Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
+
+            if (eidType != null)
+            {
+                var eid = Activator.CreateInstance(eidType, this.Web, listName);
+                MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
+                var res = mi.Invoke(val, new[] { entity, eid });
+                return (bool)res;
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region [ Overrides ]
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (!disposing) return;
+
+            if (_web != null && (SPContext.Current == null || _web != SPContext.Current.Web))
+            {
+                try
+                {
+                    _web.Dispose();
+                }
+                catch { }
+                _web = null;
+            }
+            if (_site != null && (SPContext.Current == null || _site != SPContext.Current.Site))
+            {
+                try
+                {
+                    _site.Dispose();
+                }
+                catch { }
+                _site = null;
+            }
+        }
+
+        public override EntityList<TEntity> GetList<TEntity>(string listName)
+        {
+            if (_loadedLists.ContainsKey(listName))
+            {
+                LatestList = _loadedLists[listName];
+            }
+            else
+            {
+                LatestList = _web.GetListByName(listName);
+                _loadedLists.Add(listName, LatestList);
+            }
+
+            return base.GetList<TEntity>(LatestList.Title);
+        }
+
+        #endregion
+
+        #region [Public methods ]
+
+        public SPList GetSPList<TEntity>(string listName) where TEntity : EntityItem
+        {
+            return GetListMetaData<TEntity>(listName).List ?? LatestList;
+        }
+
         /// <summary>
         /// Retrieving metadata for list
         /// </summary>
@@ -195,5 +258,13 @@ namespace SPCore.Linq
         {
             return EntityListMetaData.GetMetaData(GetList<TEntity>(listName));
         }
+
+        public bool IsAttached<TEntity>(TEntity entity, string listName) where TEntity : EntityItem
+        {
+
+            return EntityExistsInContext(entity, listName);
+        }
+
+        #endregion
     }
 }

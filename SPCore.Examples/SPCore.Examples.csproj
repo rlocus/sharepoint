@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8A9F3C1B-15E3-4CE4-8101-DCBF1990383D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SPCore.Examples</RootNamespace>
+    <AssemblyName>SPCore.Examples</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{BB1F664B-9266-4fd6-B973-E1E44974B511};{14822709-B5A1-4724-98CA-57A101D1B079};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SandboxedSolution>True</SandboxedSolution>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.SharePoint.Linq, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Common Files\Microsoft Shared\Web Server Extensions\14\ISAPI\Microsoft.SharePoint.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.SharePoint" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Branch.cs" />
+    <Compile Include="Company.cs" />
+    <Compile Include="Customer.cs" />
+    <Compile Include="CustomerRepository.cs" />
+    <Compile Include="Department.cs" />
+    <Compile Include="Employee.cs" />
+    <Compile Include="EmployeeDataContext.cs" />
+    <Compile Include="EmployeeRepository.cs" />
+    <Compile Include="Item.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SampleListDefinition.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ContentTypes\Branch\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{886f4515-49ba-4418-a740-f10982f12c03}</SharePointProjectItemId>
+    </None>
+    <None Include="ContentTypes\Company\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{1b5bdab3-e5d7-40f5-b03d-e6b6fe9253e6}</SharePointProjectItemId>
+    </None>
+    <None Include="ContentTypes\Employee\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{92191eaa-30ad-46d4-a203-20815d77a9b8}</SharePointProjectItemId>
+    </None>
+    <None Include="ContentTypes\Department\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{7b434fbd-9903-416d-b01d-6038cf17f14e}</SharePointProjectItemId>
+    </None>
+    <None Include="Features\Data\Data.feature">
+      <FeatureId>{24b3a826-5e59-49dd-b582-acd0374b944b}</FeatureId>
+    </None>
+    <None Include="key.snk" />
+    <None Include="Lists\Employees\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{ed4edbaa-336d-4a17-88cc-09aa1a93f7c2}</SharePointProjectItemId>
+    </None>
+    <None Include="Lists\Departments\SharePointProjectItem.spdata">
+      <SharePointProjectItemId>{8e09b2e8-54de-4a5c-85f6-e2f4c6af0f9d}</SharePointProjectItemId>
+    </None>
+    <None Include="Package\Package.package">
+      <PackageId>{0d64c92b-f483-49cb-b700-87abdeb1b2dd}</PackageId>
+    </None>
+    <None Include="Package\Package.Template.xml">
+      <DependentUpon>Package.package</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ContentTypes\Branch\Elements.xml" />
+    <Content Include="ContentTypes\Company\Elements.xml" />
+    <Content Include="ContentTypes\Employee\Elements.xml" />
+    <Content Include="ContentTypes\Department\Elements.xml" />
+    <Content Include="Features\Data\Data.Template.xml">
+      <DependentUpon>Data.feature</DependentUpon>
+    </Content>
+    <Content Include="Lists\Employees\Elements.xml" />
+    <Content Include="Lists\Employees\Schema.xml" />
+    <Content Include="Lists\Departments\Elements.xml" />
+    <Content Include="Lists\Departments\Schema.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SPCore\SPCore.csproj">
+      <Project>{11A09833-F316-43D9-B5E4-A6F2132D1A3A}</Project>
+      <Name>SPCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(VSToolsPath)\SharePointTools\Microsoft.VisualStudio.SharePoint.targets" Condition="'$(VSToolsPath)' != ''" />
+</Project>

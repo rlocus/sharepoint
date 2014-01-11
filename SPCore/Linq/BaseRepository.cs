@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -36,7 +37,7 @@ namespace SPCore.Linq
 
         #region [ Properties ]
 
-        protected TContext Context { get; private set; }
+        public TContext Context { get; private set; }
 
         private EntityList<TEntity> _list;
 
@@ -49,29 +50,13 @@ namespace SPCore.Linq
                     throw new ArgumentNullException("Context");
                 }
 
-                return _list ?? (_list = GetList(Context, ListName));
+                return _list ?? (_list = Context.GetList<TEntity>(ListName));
             }
         }
 
-        /// <summary>
-        /// EntityList meta data
-        /// </summary>
-        protected EntityListMetaData MetaData
+        protected SPList SPList
         {
-            get
-            {
-                if (Context == null)
-                {
-                    throw new ArgumentNullException("Context");
-                }
-
-                return GetList(Context, ListName).GetMetaData();
-            }
-        }
-
-        protected virtual SPList SPList
-        {
-            get { return _spList ?? (_spList = MetaData.List ?? this.Context.LatestList); }
+            get { return _spList ?? (_spList = this.Context.GetSPList<TEntity>(ListName)); }
         }
 
         protected TextWriter Log { get { return Context.Log; } set { Context.Log = value; } }
@@ -106,7 +91,7 @@ namespace SPCore.Linq
             CrossSite = crossSite;
             ListName = listName;
             WebUrl = webUrl;
-          
+
             IsAnonymous = SPContext.Current != null && SPContext.Current.Web.CurrentUser == null;
             Context = CreateContext(crossSite);
         }
@@ -176,8 +161,6 @@ namespace SPCore.Linq
 
         private void Commit(TContext context, ConflictMode conflictMode, bool systemUpdate)
         {
-            if (context == null) { throw new ArgumentException("Context"); }
-
             if (conflictMode == ConflictMode.ContinueOnConflict)
             {
                 try
@@ -193,46 +176,6 @@ namespace SPCore.Linq
             {
                 context.SubmitChanges(conflictMode, systemUpdate);
             }
-        }
-
-        #endregion
-
-        #region [ Helper Methods ]
-        /// <summary>
-        /// Check entity is attached to context
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="entity">entity</param>
-        /// <param name="listName"></param>
-        /// <returns>true - attached, false - is not attached</returns>
-        static bool EntityExistsInContext(TContext context, TEntity entity, string listName)
-        {
-            //if (context == null) { throw new ArgumentException("Context"); }
-
-            Type type = context.GetType();
-            PropertyInfo pi = type.GetProperty("EntityTracker", BindingFlags.NonPublic | BindingFlags.Instance);
-            var val = pi.GetValue(context, null);
-            Type trackerType = val.GetType();
-            Type eidType =
-                Type.GetType("Microsoft.SharePoint.Linq.EntityId, " + typeof(DataContext).Assembly.FullName);
-            var eid = Activator.CreateInstance(eidType, context.Web, listName);
-            MethodInfo mi = trackerType.GetMethod("TryGetId", BindingFlags.Public | BindingFlags.Instance);
-            var res = mi.Invoke(val, new[] { entity, eid });
-            return (bool)res;
-        }
-
-        static bool IsAttached(TContext context, TEntity entity, string listName)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-
-            return EntityExistsInContext(context, entity, listName);
-        }
-
-        static EntityList<TEntity> GetList(TContext context, string listName)
-        {
-            if (context == null) throw new ArgumentNullException("context");
-
-            return context.GetList<TEntity>(listName);
         }
 
         #endregion
@@ -256,33 +199,6 @@ namespace SPCore.Linq
             }
         }
 
-        //protected override void OnSaveEntity(TContext context, EntityList<TEntity> list, TEntity entity)
-        //{
-        //    if (entity.Manager != null)
-        //    {
-        //        if (entity.Manager.Id == null)
-        //        {
-        //            this.SaveEntityNow((TEntity)entity.Manager);
-
-        //            if (list != this.List)
-        //            {
-        //                list.Attach((TEntity)entity.Manager);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (list != this.List)
-        //            {
-        //                list.Attach((TEntity)entity.Manager);
-        //            }
-
-        //            context.Refresh(RefreshMode.KeepCurrentValues, entity.Manager);
-        //        }
-        //    }
-
-        //    base.OnSaveEntity(context, list, entity);
-        //}
-
         protected virtual void OnSaveEntity(TContext context, EntityList<TEntity> list, TEntity entity)
         {
             if (!entity.Id.HasValue)
@@ -293,7 +209,7 @@ namespace SPCore.Linq
 
             if (context == this.Context)
             {
-                if (!IsAttached(context, entity, SPList.Title))
+                if (!context.IsAttached(entity, SPList.Title))
                 {
                     list.Attach(entity);
                 }
@@ -304,29 +220,42 @@ namespace SPCore.Linq
             }
         }
 
-        //protected void DeleteEntityVersion(int entityId, int versionId)
-        //{
-        //    SPListItem item = SPList.GetItemById(entityId);
-        //    SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString(CultureInfo.InvariantCulture));
-        //    version.Delete();
-        //}
-
-        //protected IEnumerable<TEntity> GetVersions(int id)
-        //{
-        //    var item = SPList.GetItemById(id);
-        //    var versions = item.Versions
-        //        .Cast<SPListItemVersion>()
-        //        .Select(v => Activator.CreateInstance(typeof(TEntity), v))
-        //        .Cast<TEntity>()
-        //        .ToList();
-        //    return versions;
-        //}
-
-        protected bool IsAttached(TContext context, TEntity entity)
+        protected void DeleteEntityVersion(int entityId, int versionId)
         {
-            if (context == null) throw new ArgumentNullException("context");
+            SPListItem item = SPList.GetItemById(entityId);
+            SPListItemVersion version = item.Versions.GetVersionFromLabel(versionId.ToString(CultureInfo.InvariantCulture));
+            version.Delete();
+        }
 
-            return EntityExistsInContext(context, entity, SPList.Title);
+        protected TContext CreateContext()
+        {
+            return CreateContext(false);
+        }
+
+        protected TContext CreateContext(bool crossSite)
+        {
+            TContext context;
+
+            if (crossSite)
+            {
+                HttpContext backupCtx = HttpContext.Current;
+                HttpContext.Current = null;
+
+                try
+                {
+                    context = GetContext();
+                }
+                finally
+                {
+                    HttpContext.Current = backupCtx;
+                }
+            }
+            else
+            {
+                context = GetContext();
+            }
+
+            return context;
         }
 
         #endregion
@@ -414,16 +343,12 @@ namespace SPCore.Linq
         /// <param name="id">Id</param>
         public TEntity GetEntity(int id)
         {
-            return List
-                .ScopeToFolder(string.Empty, true)
-                .SingleOrDefault(entry => entry.Id == id);
+            return List.ScopeToFolder(string.Empty, true).SingleOrDefault(entry => entry.Id == id);
         }
 
         public TEntity GetEntity(Expression<Func<TEntity, bool>> where, string path = "", bool recursive = true)
         {
-            return List
-                .ScopeToFolder(path, recursive)
-                .FirstOrDefault(where);
+            return List.ScopeToFolder(path, recursive).FirstOrDefault(where);
         }
 
         /// <summary>
@@ -432,8 +357,6 @@ namespace SPCore.Linq
         /// <param name="entity">entity</param>
         public void DeleteEntity(TEntity entity)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             if (!entity.Id.HasValue)
                 throw new ArgumentException("Entity has no identifier.");
 
@@ -441,24 +364,20 @@ namespace SPCore.Linq
             {
                 List.DeleteOnSubmit(entity);
             }
-            //else
-            //{
-            //    if (!entity.Version.HasValue)
-            //        throw new ArgumentException("Entity version has no identifier.");
+            else
+            {
+                if (!entity.Version.HasValue)
+                    throw new ArgumentException("Entity version has no identifier.");
 
-            //    DeleteEntityVersion(entity.Id.Value, entity.Version.Value);
-            //}
+                DeleteEntityVersion(entity.Id.Value, entity.Version.Value);
+            }
         }
 
         public void DeleteEntity(int id)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
-            IQueryable<TEntity> query = List
+            TEntity entity = List
                 .ScopeToFolder(string.Empty, true)
-                .Where(entry => entry.Id == id);
-
-            TEntity entity = query.FirstOrDefault();
+                .FirstOrDefault(entry => entry.Id == id);
 
             if (entity != null)
             {
@@ -468,15 +387,11 @@ namespace SPCore.Linq
 
         public void DeleteEntityCollection(IEnumerable<TEntity> entities)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             List.DeleteAllOnSubmit(entities);
         }
 
         public void DeleteAll()
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
-
             IQueryable<TEntity> entities = GetEntityCollection(entry => true);
             DeleteEntityCollection(entities);
             Commit();
@@ -488,20 +403,23 @@ namespace SPCore.Linq
         /// <param name="entity">entity</param>
         public void SaveEntity(TEntity entity)
         {
-            //if (Context == null) { throw new ArgumentException("Context"); }
+            if (entity == null) { return; }
+
             OnSaveEntity(Context, List, entity);
         }
 
         public void SaveEntityNow(TEntity entity, ConflictMode conflictMode = ConflictMode.FailOnFirstConflict, bool systemUpdate = false)
         {
+            if (entity == null) { return; }
+
             using (TContext context = CreateContext(CrossSite))
             {
-                EntityList<TEntity> list = GetList(context, ListName);
+                EntityList<TEntity> list = context.GetList<TEntity>(ListName);
                 OnSaveEntity(context, list, entity);
                 Commit(context, conflictMode, systemUpdate);
             }
 
-            if (!IsAttached(this.Context, entity))
+            if (!this.Context.IsAttached(entity, ListName))
             {
                 this.List.Attach(entity);
             }
@@ -629,37 +547,6 @@ namespace SPCore.Linq
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        public TContext CreateContext()
-        {
-            return CreateContext(false);
-        }
-
-        public TContext CreateContext(bool crossSite)
-        {
-            TContext context;
-
-            if (crossSite)
-            {
-                HttpContext backupCtx = HttpContext.Current;
-                HttpContext.Current = null;
-
-                try
-                {
-                    context = GetContext();
-                }
-                finally
-                {
-                    HttpContext.Current = backupCtx;
-                }
-            }
-            else
-            {
-                context = GetContext();
-            }
-
-            return context;
         }
 
         public DataTable GetDataTable(IEnumerable<TEntity> entities)

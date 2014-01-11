@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<List xmlns:ows="Microsoft SharePoint" Title="Employees" FolderCreation="FALSE" Direction="$Resources:Direction;" Url="Lists/SPCore.Examples-ListDefinition1" BaseType="0" xmlns="http://schemas.microsoft.com/sharepoint/">
+  <MetaData>
+    <ContentTypes>
+      <ContentTypeRef ID="0x010078b0dd38574940478cf9e129fcd65e9b" />
+    </ContentTypes>
+    <Fields>
+      <Field ID="{a9003476-95e9-439d-873b-2848e2e7a591}" Name="Manager" DisplayName="Manager" Type="Lookup" ShowField="Title" List="Lists/Employees">
+      </Field>
+      <Field ID="{4bd99c62-096a-4a7f-83b9-36ec6ce93c80}" Name="ExDepartment" DisplayName="Department" Type="Lookup" ShowField="Title" List="Lists/Department">
+      </Field>
+      <Field ID="{8ed560f6-21ec-4b32-abed-47d3777a8325}" Name="ExCellPhone" DisplayName="CellPhone" Type="Text">
+      </Field>
+      <Field ID="{0eb872f2-94a8-455b-9c0f-529dd0688a41}" Name="AccessLevel" DisplayName="Access Level" Type="Integer">
+      </Field>
+      <Field ID="{68c1ee4a-5a25-4ccb-82ca-f5ff17e2016f}" Name="Sex" DisplayName="Sex" Type="Choice" Format="RadioButtons">
+    <CHOICES>
+      <CHOICE>Male</CHOICE>
+      <CHOICE>Female</CHOICE>
+    </CHOICES>
+    <MAPPINGS>
+      <MAPPING Value="1">Male</MAPPING>
+      <MAPPING Value="2">Female</MAPPING>
+    </MAPPINGS>
+    <Default>Male</Default>
+  </Field>
+      <Field ID="{bd1898b4-0869-41f2-9db0-b0f1b8f139d3}" Name="ExHobbies" DisplayName="Hobbies" Type="MultiChoice" Overwrite="TRUE">
+    <CHOICES>
+      <CHOICE>Chess</CHOICE>
+      <CHOICE>Football</CHOICE>
+      <CHOICE>Basketball</CHOICE>
+    </CHOICES>
+    <MAPPINGS>
+      <MAPPING Value="1">Chess</MAPPING>
+      <MAPPING Value="2">Football</MAPPING>
+      <MAPPING Value="3">Basketball</MAPPING>
+    </MAPPINGS>
+    <Default>Chess</Default>
+  </Field>
+    </Fields>
+    <Views>
+      <View BaseViewID="0" Type="HTML" MobileView="TRUE" TabularView="FALSE">
+        <Toolbar Type="Standard" />
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <RowLimit Paged="TRUE">30</RowLimit>
+        <ViewFields>
+          <FieldRef Name="LinkTitleNoMenu">
+          </FieldRef>
+        </ViewFields>
+        <Query>
+          <OrderBy>
+            <FieldRef Name="Modified" Ascending="FALSE">
+            </FieldRef>
+          </OrderBy>
+        </Query>
+        <ParameterBindings>
+          <ParameterBinding Name="AddNewAnnouncement" Location="Resource(wss,addnewitem)" />
+          <ParameterBinding Name="NoAnnouncements" Location="Resource(wss,noXinviewofY_LIST)" />
+          <ParameterBinding Name="NoAnnouncementsHowTo" Location="Resource(wss,noXinviewofY_ONET_HOME)" />
+        </ParameterBindings>
+      </View>
+      <View BaseViewID="1" Type="HTML" WebPartZoneID="Main" DisplayName="$Resources:core,objectiv_schema_mwsidcamlidC24;" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" SetupPath="pages\viewpage.aspx" ImageUrl="/_layouts/images/generic.png" Url="AllItems.aspx">
+        <Toolbar Type="Standard" />
+        <XslLink Default="TRUE">main.xsl</XslLink>
+        <RowLimit Paged="TRUE">30</RowLimit>
+        <ViewFields>
+          <FieldRef Name="Attachments">
+          </FieldRef>
+          <FieldRef Name="LinkTitle">
+          </FieldRef>
+        </ViewFields>
+        <Query>
+          <OrderBy>
+            <FieldRef Name="ID">
+            </FieldRef>
+          </OrderBy>
+        </Query>
+        <ParameterBindings>
+          <ParameterBinding Name="NoAnnouncements" Location="Resource(wss,noXinviewofY_LIST)" />
+          <ParameterBinding Name="NoAnnouncementsHowTo" Location="Resource(wss,noXinviewofY_DEFAULT)" />
+        </ParameterBindings>
+      </View>
+    </Views>
+    <Forms>
+      <Form Type="DisplayForm" Url="DispForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="EditForm" Url="EditForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+      <Form Type="NewForm" Url="NewForm.aspx" SetupPath="pages\form.aspx" WebPartZoneID="Main" />
+    </Forms>
+  </MetaData>
+</List>
