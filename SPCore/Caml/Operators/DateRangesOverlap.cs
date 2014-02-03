@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.SharePoint;
@@ -18,6 +19,11 @@ namespace SPCore.Caml.Operators
     public sealed class DateRangesOverlap : MultipleFieldValueOperator<DateTime>
     {
         private DateRangesOverlapValue? _enumValue;
+
+        public DateRangesOverlap(IEnumerable<FieldRef> fieldRefs, DateTime value)
+            : base("DateRangesOverlap", fieldRefs, value, SPFieldType.DateTime)
+        {
+        }
 
         public DateRangesOverlap(DateTime value, params Guid[] fieldIds)
             : base("DateRangesOverlap", fieldIds, value, SPFieldType.DateTime)

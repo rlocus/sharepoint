@@ -6,6 +6,16 @@ namespace SPCore.Caml.Operators
 {
     public sealed class Lt<T> : SingleFieldValueOperator<T>
     {
+        public Lt(FieldRef fieldRef, Value<T> value)
+            : base("Lt", fieldRef, value)
+        {
+        }
+
+        public Lt(FieldRef fieldRef, T value, SPFieldType type)
+            : base("Lt", fieldRef, value, type)
+        {
+        }
+
         public Lt(Guid fieldId, T value, SPFieldType type)
             : base("Lt", fieldId, value, type)
         {

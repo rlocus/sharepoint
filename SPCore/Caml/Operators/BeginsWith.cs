@@ -6,6 +6,16 @@ namespace SPCore.Caml.Operators
 {
     public sealed class BeginsWith : SingleFieldValueOperator<string>
     {
+        public BeginsWith(FieldRef fieldRef, Value<string> value)
+            : base("BeginsWith", fieldRef, value)
+        {
+        }
+
+        public BeginsWith(FieldRef fieldRef, string value)
+            : base("BeginsWith", fieldRef, value, SPFieldType.Text)
+        {
+        }
+
         public BeginsWith(Guid fieldId, string value)
             : base("BeginsWith", fieldId, value, SPFieldType.Text)
         {

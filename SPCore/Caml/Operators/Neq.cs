@@ -6,6 +6,16 @@ namespace SPCore.Caml.Operators
 {
     public sealed class Neq<T> : SingleFieldValueOperator<T>
     {
+        public Neq(FieldRef fieldRef, Value<T> value)
+            : base("Neq", fieldRef, value)
+        {
+        }
+
+        public Neq(FieldRef fieldRef, T value, SPFieldType type)
+            : base("Neq", fieldRef, value, type)
+        {
+        }
+
         public Neq(Guid fieldId, T value, SPFieldType type)
             : base("Neq", fieldId, value, type)
         {

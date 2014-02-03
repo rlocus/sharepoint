@@ -6,6 +6,16 @@ namespace SPCore.Caml.Operators
 {
     public sealed class Geq<T> : SingleFieldValueOperator<T>
     {
+        public Geq(FieldRef fieldRef, Value<T> value)
+            : base("Geq", fieldRef, value)
+        {
+        }
+
+        public Geq(FieldRef fieldRef, T value, SPFieldType type)
+            : base("Geq", fieldRef, value, type)
+        {
+        }
+
         public Geq(Guid fieldId, T value, SPFieldType type)
             : base("Geq", fieldId, value, type)
         {

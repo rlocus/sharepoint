@@ -56,7 +56,7 @@ namespace SPCore.Caml
             return sb.ToString();
         }
 
-        private XElement ToCaml()
+        public XElement ToCaml()
         {
             var el = new XElement(QueryTag);
 

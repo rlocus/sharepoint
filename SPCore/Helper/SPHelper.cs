@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -751,6 +752,69 @@ namespace SPCore.Helper
             return
                 services.SelectMany(service => service.RunningJobs.Cast<SPRunningJob>()).Any(
                     job => job.JobDefinitionId.Equals(jobId));
+        }
+
+        /// <summary>
+        /// SPUtility.GetLayoutsFolder
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLayoutsFolder()
+        {
+            int version = SPFarm.Local.BuildVersion.Major;
+            string layoutsPath = "_layouts";
+
+            if (version >= 15)
+            {
+                layoutsPath = layoutsPath + "/" + version;
+            }
+
+            return layoutsPath;
+        }
+
+        public static string GetUrlFromPrefixedUrl(string prefixedUrl, bool fullUrl = false)
+        {
+            if (string.IsNullOrEmpty(prefixedUrl) || SPContext.Current == null)
+            {
+                return prefixedUrl;
+            }
+
+            string webUrl = fullUrl ? SPContext.Current.Web.Url : SPContext.Current.Web.ServerRelativeUrl;
+            string siteUrl = fullUrl ? SPContext.Current.Site.Url : SPContext.Current.Site.ServerRelativeUrl;
+
+            StringBuilder stringBuilder = new StringBuilder();
+            int length;
+
+            if (prefixedUrl.StartsWith("~layouts/", true, CultureInfo.InvariantCulture))
+            {
+                stringBuilder.Append(SPUrlUtility.CombineUrl(siteUrl, GetLayoutsFolder()));
+                length = "~layouts/".Length;
+            }
+            else if (prefixedUrl.StartsWith("~siteLayouts/", true, CultureInfo.InvariantCulture))
+            {
+                stringBuilder.Append(SPUrlUtility.CombineUrl(webUrl, GetLayoutsFolder()));
+                length = "~siteLayouts/".Length;
+            }
+            else if (prefixedUrl.StartsWith(SPUtility.SiteRelativeUrlPrefix, true, CultureInfo.InvariantCulture))
+            {
+                stringBuilder.Append(siteUrl);
+                length = SPUtility.SiteRelativeUrlPrefix.Length;
+            }
+            else if (prefixedUrl.StartsWith(SPUtility.WebRelativeUrlPrefix, true, CultureInfo.InvariantCulture))
+            {
+                stringBuilder.Append(webUrl);
+                length = SPUtility.WebRelativeUrlPrefix.Length;
+            }
+            else
+            {
+                return prefixedUrl;
+            }
+
+            if (stringBuilder.Length <= 0 || stringBuilder[stringBuilder.Length - 1] != '/')
+            {
+                stringBuilder.Append('/');
+            }
+            stringBuilder.Append(prefixedUrl.Substring(length));
+            return stringBuilder.ToString();
         }
     }
 }

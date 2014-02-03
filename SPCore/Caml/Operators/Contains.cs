@@ -6,6 +6,16 @@ namespace SPCore.Caml.Operators
 {
     public sealed class Contains : SingleFieldValueOperator<string>
     {
+        public Contains(FieldRef fieldRef, Value<string> value)
+            : base("Contains", fieldRef, value)
+        {
+        }
+
+        public Contains(FieldRef fieldRef, string value)
+            : base("Contains", fieldRef, value, SPFieldType.Text)
+        {
+        }
+
         public Contains(Guid fieldId, string value)
             : base("Contains", fieldId, value, SPFieldType.Text)
         {
