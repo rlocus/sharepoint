@@ -703,6 +703,27 @@ namespace SPCore
             return item.Fields.ContainsField(fieldName);
         }
 
+        public static SPListItem CloneItem(this SPListItem item)
+        {
+            if (item == null) throw new ArgumentNullException("item");
+            SPListItem cloneItem = item.ParentList.AddItem();
+
+            foreach (SPField field in item.Fields)
+            {
+                if (field.Hidden ||
+                    (SPBuiltInFieldId.Contains(field.Id) && field.ReadOnlyField) ||
+                    (field.Type == SPFieldType.Calculated ||
+                     field.Type == SPFieldType.Attachments ||
+                     field.Type == SPFieldType.Counter ||
+                     field.Type == SPFieldType.WorkflowStatus))
+                {
+                    continue;
+                }
+                cloneItem[field.Id] = item[field.Id];
+            }
+            return cloneItem;
+        }
+
         #endregion
     }
 }

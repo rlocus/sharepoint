@@ -1,26 +1,30 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.SharePoint;
 
 namespace SPCore
 {
     public static class PermissionExtensions
     {
-        public static SPGroup GetGroup(this SPGroupCollection groups, string groupName)
+        public static SPGroup GetByName(this SPGroupCollection groups, string groupName)
         {
-            return groups.Cast<SPGroup>().FirstOrDefault(
-                @group =>
-                string.Equals(group.Name, groupName, StringComparison.OrdinalIgnoreCase));
+            try
+            {
+                return groups[groupName];
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public static bool GroupExists(this SPGroupCollection groups, string groupName)
+        public static bool Exists(this SPGroupCollection groups, string groupName)
         {
-            return GetGroup(groups, groupName) != null;
+            return groups.GetByName(groupName) != null;
         }
 
         public static bool BelongsToGroup(this SPUser user, string groupName)
         {
-            return user.Groups.Cast<SPGroup>().Any(@g => g.Name == groupName);
+            return Exists(user.Groups, groupName);
         }
 
         public static bool AssignmentExists(this SPSecurableObject securableObject, SPPrincipal principal)
@@ -74,18 +78,24 @@ namespace SPCore
 
             SPRoleAssignment roleAssignment = GetAssignment(securableObject, principal);
 
-            if (roleAssignment == null)
+            if (roleAssignment != null)
             {
-                roleAssignment = new SPRoleAssignment(principal);
-                roleAssignment.RoleDefinitionBindings.Add(roleDefinition);
-            }
-
-            if (replaceAllDefinitions)
-            {
-                try
+                if (replaceAllDefinitions)
                 {
                     roleAssignment.RoleDefinitionBindings.RemoveAll();
                     roleAssignment.RoleDefinitionBindings.Add(roleDefinition);
+
+                }
+                else
+                {
+                    if (!roleAssignment.RoleDefinitionBindings.Contains(roleDefinition))
+                    {
+                        roleAssignment.RoleDefinitionBindings.Add(roleDefinition);
+                    }
+                }
+
+                try
+                {
                     roleAssignment.Update();
                 }
                 catch (ArgumentException)
@@ -96,6 +106,13 @@ namespace SPCore
             }
             else
             {
+                roleAssignment = new SPRoleAssignment(principal);
+
+                if (!roleAssignment.RoleDefinitionBindings.Contains(roleDefinition))
+                {
+                    roleAssignment.RoleDefinitionBindings.Add(roleDefinition);
+                }
+
                 securableObject.RoleAssignments.Add(roleAssignment);
             }
         }

@@ -13,7 +13,7 @@ namespace SPCore.Taxonomy
 {
     public class ManagedMetadataManager
     {
-        private const string FirstLine = "\"Term Set Name\",\"Term Set Description\",\"LCID\",\"Available for Tagging\",\"Term Description\",\"Level 1 Term\",\"Level 2 Term\",\"Level 3 Term\",\"Level 4 Term\",\"Level 5 Term\",\"Level 6 Term\",\"Level 7 Term\"";
+        private const string FirstLine = "\"TermSetName\",\"TermSetDescription\",\"LCID\",\"AvailableForTagging\",\"TermDescription\",\"Level1\",\"Level2\",\"Level3\",\"Level4\",\"Level5\",\"Level6\",\"Level7\"";
 
         private readonly TermStore _termStore;
         private readonly string _groupName;
@@ -67,7 +67,7 @@ namespace SPCore.Taxonomy
                 }
 
                 Hashtable parsed = ParseContent(sb.ToString(), Delimiter);
-                var entities = GetEntities(parsed);
+                var entities = GetEntities(parsed).ToArray();
                 ImportTermSet(entities, thisGroup, isOpenForTermCreation);
             }
         }
@@ -267,59 +267,69 @@ namespace SPCore.Taxonomy
 
             if (count > 0)
             {
-                entity.TermSetName = values.ElementAt(0);
-
-                if (count > 1)
+                try
                 {
-                    entity.TermSetDescription = values.ElementAt(1);
+                    entity.TermSetName = values.ElementAt(0);
 
-                    if (count > 2)
+                    if (count > 1)
                     {
-                        int lcid;
+                        entity.TermSetDescription = values.ElementAt(1);
 
-                        if (int.TryParse(values.ElementAt(2), out lcid))
+                        if (count > 2)
                         {
-                            entity.LCID = entity.LCID == default(int) ? 1033 : lcid;
-                        }
-                        if (count > 3)
-                        {
-                            entity.AvailableForTagging = Convert.ToBoolean(values.ElementAt(3));
+                            int lcid;
 
-                            if (count > 4)
+                            if (int.TryParse(values.ElementAt(2), out lcid))
                             {
-                                entity.TermDescription = values.ElementAt(4);
-                                if (count > 5)
+                                entity.LCID = entity.LCID == default(int) ? 1033 : lcid;
+                            }
+                            if (count > 3)
+                            {
+                                bool availableForTagging;
+                                if (bool.TryParse(values.ElementAt(3), out availableForTagging))
                                 {
-                                    entity.Level1Term = values.ElementAt(5);
+                                    entity.AvailableForTagging = availableForTagging;
+                                }
 
-                                    if (count > 6)
+                                if (count > 4)
+                                {
+                                    entity.TermDescription = values.ElementAt(4);
+                                    if (count > 5)
                                     {
-                                        entity.Level2Term = values.ElementAt(6);
-                                    }
-                                    if (count > 7)
-                                    {
-                                        entity.Level3Term = values.ElementAt(7);
-                                    }
-                                    if (count > 8)
-                                    {
-                                        entity.Level4Term = values.ElementAt(8);
-                                    }
-                                    if (count > 9)
-                                    {
-                                        entity.Level5Term = values.ElementAt(9);
-                                    }
-                                    if (count > 10)
-                                    {
-                                        entity.Level6Term = values.ElementAt(10);
-                                    }
-                                    if (count > 11)
-                                    {
-                                        entity.Level7Term = values.ElementAt(11);
+                                        entity.Level1Term = values.ElementAt(5);
+
+                                        if (count > 6)
+                                        {
+                                            entity.Level2Term = values.ElementAt(6);
+                                        }
+                                        if (count > 7)
+                                        {
+                                            entity.Level3Term = values.ElementAt(7);
+                                        }
+                                        if (count > 8)
+                                        {
+                                            entity.Level4Term = values.ElementAt(8);
+                                        }
+                                        if (count > 9)
+                                        {
+                                            entity.Level5Term = values.ElementAt(9);
+                                        }
+                                        if (count > 10)
+                                        {
+                                            entity.Level6Term = values.ElementAt(10);
+                                        }
+                                        if (count > 11)
+                                        {
+                                            entity.Level7Term = values.ElementAt(11);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
                 }
             }
 
@@ -387,16 +397,28 @@ namespace SPCore.Taxonomy
 
             if (term == null)
             {
+                //try
+                //{
                 term = termSet.CreateTerm(termName, lcid, Guid.NewGuid());
                 term.IsAvailableForTagging = entity.AvailableForTagging;
+                //}
+                //catch (Exception ex)
+                //{
+                //}
             }
 
             LabelCollection allLabels = term.GetAllLabels(lcid);
 
             if (allLabels.Count == 0 || !allLabels.Select(x => x.Value).Contains(termName))
             {
+                //try
+                //{
                 term.CreateLabel(termName, lcid, true);
                 term.SetDescription(entity.TermDescription, lcid);
+                //}
+                //catch (Exception ex)
+                //{
+                //}
             }
 
             if (termLevels == null) { return; }
@@ -411,6 +433,5 @@ namespace SPCore.Taxonomy
                 UpdateTerm(term, childEntity, termLevels, currLevel + 1);
             }
         }
-
     }
 }

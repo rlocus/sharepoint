@@ -34,7 +34,7 @@ namespace SPCore.UI
             {
                 if (!IsEntityUser(pickerEntity))
                 {
-                    SPGroup group = web.SiteGroups.GetGroup(pickerEntity.Description);
+                    SPGroup group = web.SiteGroups.GetByName(pickerEntity.Description);
 
                     if (group != null)
                     {
@@ -55,7 +55,7 @@ namespace SPCore.UI
                 }
                 else
                 {
-                    SPGroup group = web.SiteGroups.GetGroup(pickerEntity.Description);
+                    SPGroup group = web.SiteGroups.GetByName(pickerEntity.Description);
 
                     if (group != null)
                     {

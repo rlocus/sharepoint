@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.SharePoint;
 using Microsoft.SharePoint.Administration;
-using Microsoft.SharePoint.Utilities;
 using SPCore.Helper;
 using SPCore.Logging;
 
@@ -14,18 +12,6 @@ namespace SPCore.Base
         readonly Logger _logger;
 
         #region [Properties]
-
-        public IEnumerable<string> WebUrls
-        {
-            get
-            {
-                return GetWebUrls((string)Properties["WebUrls"]);
-            }
-            set
-            {
-                Properties["WebUrls"] = GetWebUrlString(WebApplication, value);
-            }
-        }
 
         public ActionScope ActionScope
         {
@@ -41,10 +27,22 @@ namespace SPCore.Base
             set { Properties["ActionScope"] = value; }
         }
 
+        public string WebUrl
+        {
+            get
+            {
+                if (Properties["WebUrl"] != null)
+                {
+                    return (string)Properties["WebUrl"];
+                }
+
+                return string.Empty;
+            }
+            set { Properties["WebUrl"] = value; }
+        }
+
         public abstract string DefaultJobName { get; }
         public abstract string DefaultJobTitle { get; }
-
-        ////public event EventHandler OnExecuted;
 
         #endregion
 
@@ -67,24 +65,6 @@ namespace SPCore.Base
             if (string.IsNullOrEmpty(jobName))
             {
                 Name = string.Format("{0}", DefaultJobName);
-            }
-
-            if (!string.IsNullOrEmpty(DefaultJobTitle))
-            {
-                Title = DefaultJobTitle;
-            }
-
-            _logger = new Logger(Title);
-        }
-
-        protected BaseJobDefinition(string jobName, IEnumerable<string> webUrls, SPWebApplication webApp)
-            : base(jobName, webApp, null, SPJobLockType.Job)
-        {
-            WebUrls = webUrls;
-
-            if (string.IsNullOrEmpty(jobName))
-            {
-                Name = string.Format("{0}_{1}", DefaultJobName, webApp.Id);
             }
 
             if (!string.IsNullOrEmpty(DefaultJobTitle))
@@ -119,37 +99,16 @@ namespace SPCore.Base
         {
             if (WebApplication == null) return;
 
-            IEnumerable<string> urls = WebUrls;
-
-            if (urls.Count() == 0)
+            if (!string.IsNullOrEmpty(WebUrl))
             {
-                //ActionScope = ActionScope.AllWebs;
-                WebApplication.Sites.AsSafeEnumerable().ForEach(
-                    site => SPHelper.RunAction(ExecuteOnWeb, site, ActionScope));
+                SPHelper.RunAction(ExecuteOnWeb, this.WebUrl, ActionScope, null);
             }
             else
             {
-                //if (ActionScope == ActionScope.AllWebs || ActionScope == ActionScope.RootWeb)
-                //{
-                //    ActionScope = ActionScope.Web;
-                //}
-
-                foreach (string url in urls)
-                {
-                    SPHelper.RunAction(ExecuteOnWeb, url, ActionScope, null);
-                }
+                WebApplication.Sites.AsSafeEnumerable().ForEach(
+                   site => SPHelper.RunAction(ExecuteOnWeb, site, ActionScope));
             }
-
-            ////Executed();
         }
-
-        //protected virtual void Executed()
-        //{
-        //    if (OnExecuted != null)
-        //    {
-        //        OnExecuted(this, EventArgs.Empty);
-        //    }
-        //}
 
         protected abstract void Execute(SPWeb web);
 
@@ -162,12 +121,6 @@ namespace SPCore.Base
             catch (Exception ex)
             {
                 _logger.Error(ex);
-                //SPDiagnosticsService.Local.WriteTrace(0,
-                //                                      new SPDiagnosticsCategory(this.Name, TraceSeverity.Unexpected,
-                //                                                                EventSeverity.Error),
-                //                                      TraceSeverity.Unexpected,
-                //                                      string.Format("Web Url = {0}: {1}", web.Url, ex.Message),
-                //                                      ex.StackTrace);
             }
         }
 
@@ -190,46 +143,5 @@ namespace SPCore.Base
 
         #endregion
 
-        #region [Helper methods]
-
-        private static IEnumerable<string> GetWebUrls(string urls)
-        {
-            return !string.IsNullOrEmpty(urls)
-                       ? urls.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(url => url.Trim()).ToArray()
-                       : new string[0];
-        }
-
-        private static string GetWebUrlString(SPWebApplication webApplication, IEnumerable<string> urls)
-        {
-            string webUrls = string.Empty;
-
-            if (urls != null)
-            {
-                foreach (string url in urls)
-                {
-                    if (string.IsNullOrEmpty(url)) { continue; }
-
-                    string uriHost = webApplication.GetResponseUri(SPUrlZone.Default).AbsoluteUri;
-
-                    if (SPUrlUtility.IsUrlRelative(url))
-                    {
-                        string webUrl = SPUrlUtility.CombineUrl(uriHost, url);
-                        webUrls += webUrl + ",";
-                    }
-                    else
-                    {
-                        if (url.StartsWith(uriHost))
-                        {
-                            webUrls += url + ",";
-                        }
-                    }
-                }
-
-                webUrls = webUrls.TrimEnd(',');
-            }
-
-            return webUrls;
-        }
-        #endregion
     }
 }
